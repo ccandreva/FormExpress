@@ -1,5 +1,6 @@
 <?php
 /** ********************************************************************************
+ * $Id:                                                                               $
  * This class extends pnHTML, overridding some of the less well defined functions
  *
  **/
@@ -281,6 +282,21 @@ class FXHtml extends pnHTML {
             $this->output .= $output;
         }
     }
+
+    /**
+     * Accept a text string or array.
+     * If it is an array, output each line
+     * Needed for output of status messages
+    */
+    function TextArray ($text)
+    {
+      if (is_array($text)) {
+        foreach ($text as $t) $this->Text($t);
+      }else {
+        $this->Text($text);
+      }
+    }
+     
 
 }
 ?>

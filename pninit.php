@@ -149,15 +149,17 @@ function FormExpress_init()
     pnModSetVar('FormExpress', 'allow_dynamic_syntax', 1);
     //pnModSetVar('FormExpress', 'itemsperpage', 10);
 
+/* Can't load the module since it isn't active yet.
     if (!pnModLoad('FormExpress', 'admin')) {
         pnSessionSetVar('errormsg', _LOADFAILED);
-        return $output->GetOutput();
+        return true; 
     }
 
     //Load the sample form
     $ModName = basename( dirname( __FILE__ ) );
     FormExpress_loadform(FormExpress_serialize2form("modules/$ModName/example.fxm"));
     FormExpress_loadform(FormExpress_serialize2form("modules/$ModName/example2.fxm"));
+*/
 
     // Initialisation successful
     return true;

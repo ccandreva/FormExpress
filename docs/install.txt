@@ -1,0 +1,11 @@
+Version 0.3.5
+
+Install
+Please see FAQ at http://www.stutchbury.net
+
+Upgrade
+This is alpha software; The upgrade process is NOT supported; please don't 
+send me bug reports, questions etc (on the upgrade process). However...  
+
+0.3.2 or 0.3.3_rc1 to 0.3.5 is a code only upgrade, so just untar/unziping to the file system should suffice.
+

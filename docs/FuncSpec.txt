@@ -1,0 +1,55 @@
+Objective:
+Able to define multiple feed back forms with variable boilerplate, textboxes, text areas, checkboxes, radiobuttons and select lists.
+No interdependencies. No javascript.
+
+Define form
+Name
+Inquiry Destination (mail, database, sms etc although only mail to be done this version)
+Destination address
+
+Define form entries
+
+Parameters/Columns
+Sequence (tabindex)
+Type
+Name
+Value
+Label
+DefaultValue
+Cols (size)
+Rows
+MaxLength
+ListofValues
+Active
+Position (below or right)
+
+Boilerplate
+Text
+TextArea
+CheckBox
+RadioButton
+SelectList
+SubmitButton
+ResetButton
+
+                     boil chkb rad  sell text pass txta subm rese hid
+sequence             x    x    x    x    x    x    x    x    x    x
+group                x    x    x    x    x    x    x    x    x    x
+type                 x    x    x    x    x    x    x    x    x    x
+name                      x    x    x    x    x    x    ?    ?    x
+prompt                    x    x    x    x    x    x    x    x    
+value                x    x    x    x                             x
+default_value             x    x    x    x         x               
+cols                                   . x    x    x               
+rows                                               x               
+max_length                               x    x    x               
+class                x    x    x    x    x    x    x               
+multiple                            x     
+active               x    x    x    x    x    x    x    x    x    x
+relative_position    x    x    x    x    x    x    x    x    x     
+
+Values/Default Values
+
+[ModuleName->function(args)]
+
+

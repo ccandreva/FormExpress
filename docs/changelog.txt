@@ -1,0 +1,126 @@
+Current Release 0.3.5
+
+Prompts are now <label> elements for better accessability - checkboxes and radio buttons will set/unset from prompt, other input's will gain focus.
+
+New item type of Button - Default value should be 'button', 'submit' or 'reset'. Value will be displayed on button and used for value attribute.
+
+User entered value for input named 'replyto_email' will be used as 'Reply-To:' for easier response to enquiries ('From:' will still show site admin).
+
+Sent mail only shows fields which have values.
+
+Fixed block display (did not load FXHtml class, so hard-coded module name in include path).
+
+Fixed radio input tab indexing.
+
+Fixed invalid nested table layouts.
+
+Fixed <fieldset> handling - note cannot create well formed html unless you expilcitly create  a GroupEnd for each GroupStart.
+
+Nice sexy icons for admin page (not).
+
+Better grouping/order for item type select list.
+
+Added some inline help text for item create/modify.
+
+Added Klavs' security call so viewing of forms can be restricted (by form ID).
+
+Release 0.3.3
+
+Things done by new maintainer Klavs Klavsen:
+
+Fixed bug in pntables.php that was overlooked by versions of PHP prior to
+php-4.3.5 - bug found and fixed by Øivind at canvas.anubix.net (Thank you!)
+
+Fixed uploading (ie. import) of formexpress forms. It didn't work with never
+versions of php (with register_globals turned off? - I forget :)
+
+Changed default form-type to www-url-encoded - to allow for image uploading with
+Formexpress forms.
+
+Things done by previous maintainer Philip Fletcher: (0.3.3_rc1)
+
+You can set 'item attributes' i.e. class="your_css_class".
+
+Tab index works correctly within FE i.e. your cursor will tab from
+the first FE field to the last FE field correctly.  Once outside the 
+'FE zone' tabindex will be reset for each pnHTML instatiation.
+
+0 (zero) can be entered in a required field (Bug report: Jørn Lind)
+
+Import should now read binary safe on Windows
+Upload of import file should now work for Win32. Fix by Jason Earl
+Fix to Export (if > 1) Jason Earl
+
+Can add items at any place in the form (not just at the end)
+
+Some work arounds/recoding to allow FormExpress to run on PHP 4.0.6
+
+More translation variables
+
+Release 0.3.2
+
+Fixed bug where parse of dynamic syntax failed if there where zeros in the
+string (evaluates to false in PHP)
+
+Release (0.3.1)
+
+Fixed bug which stopped calls to non FormExpress modules:
+{AnyModule:anyfunction&anyvars...} or just {AnyModule}
+provided the Module implements the new module APIs (which most of the interesting stuff doesn't yet).
+
+Added ability to call any url as an interim measure:
+{FormExpress:showPage&page_url='http://www.stutchbury.net'}
+for an external page, or:
+{FormExpress:showPage&page_url='modules.php?op=modload&name=News&file=index'}
+to get at some of the legacy stuff.
+
+
+Release 0.3.0
+
+Database Cacheing of Form definitions for better performance 
+
+Import/Export of Form definitions
+
+Field validation by ereg, preg and dynamic function calls.
+
+Dynamic function calls for defaults etc. (Nesting allowed)
+
+NOTE: This uses the 'create_function' function and according to the 
+online php manual:
+"It should be noted that this function doesn't appear to work if Zend
+Optimizer is in use - causes PHP to segfault."
+I'm hoping this is fixed now 'cos Form Submit uses it too...
+
+Can now have a Form in a Sideblock
+
+Can now specify [FormExpress] as home page - set default Form in Configuration
+Feature request by Bronto
+
+Fixed 'Maximum execution time of 30 seconds exceeded' error.
+Thanks to Byron for testing.
+
+Added required field validation to Admin forms
+
+Fixed example form table name
+Thanks to Bill for bug report
+
+Removed superfluous </fieldset> tags
+
+Added check for missing HELP constants
+Thanks to trenkler for the bug report
+
+Fixed a couple of i18n constants
+
+Includes Norwegian Translations
+Thanks to Dag-Asle Langoe (NortonX)
+
+Fixed HTML markup substitution in Prompt field
+Thanks to Bronto for bug report.
+
+Fixed error if form_id > 9
+Thanks to JasonEarl for bug fix
+
+Still using mail() instead of pnMail() (does not return status)
+
+0.2.2   24-JUN-2002
+Initial Public Release

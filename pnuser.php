@@ -342,7 +342,7 @@ function FormExpress_user_display_form($args) {
 
     $output->SetInputMode(_PNH_VERBATIMINPUT);
     //Create the table
-    $output->TableStart('','', (($table_border) ? $table_border : 0));
+    $output->TableStart('','', (($table_border) ? $table_border : 0), '98%');
     $first_item = true;
     $required_fields = false;
     $is_fieldset = array();
@@ -729,7 +729,7 @@ function FormExpress_user_show_input($item) {
         }
         $output->Text('<table border="'
                      .( ($item['table_border']) ? $item['table_border'] : 0) 
-                     . '" cellpadding="2" cellspacing="0" width="100%">'
+                     . '" cellpadding="2" cellspacing="0" width="98%">'
                      );
         break;
     case 'groupend':

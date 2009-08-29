@@ -753,10 +753,14 @@ function FormExpress_user_submit_form() {
     // proceed no further as it is possible that this is an attempt at sending
     // in false data to the system
     if (!pnSecConfirmAuthKey()) {
+/*
         $output->Text(_BADAUTHKEY);
         $output->LineBreak(2);
         $output->URL(pnModURL('FormExpress', 'user', 'view'),_FORMEXPRESSVIEW);
         return $output->GetOutput();
+*/
+	$pnRender = new pnRender('FormExpress');
+	return $pnRender->fetch('formexpress_user_submit_form_badkey.html');
     }
 
     $form_id = pnVarCleanFromInput('form_id');

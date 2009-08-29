@@ -311,7 +311,7 @@ function FormExpress_user_display_form($args) {
     //$output->Title($form['form_name']);
 
     $output->SetInputMode(_PNH_VERBATIMINPUT);
-    $output->Text(pnGetStatusMsg());
+    $output->TextArray(pnGetStatusMsg());
     $output->SetInputMode(_PNH_PARSEINPUT);
     //$output->Linebreak(2);
 
@@ -456,7 +456,7 @@ function FormExpress_usermenu()
     // best place to keep it for now
 
     // Start options menu
-    $output->Text(pnGetStatusMsg());
+    $output->TextArray(pnGetStatusMsg());
     $output->Linebreak(2);
 
     // Menu options.  These options are all added in a single row, to add

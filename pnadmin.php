@@ -1248,7 +1248,7 @@ function FormExpress_adminmenu()
     // Display status message if any.  Note that in future this functionality
     // will probably be in the theme rather than in this menu, but this is the
     // best place to keep it for now
-    $output->Text(pnGetStatusMsg());
+    $output->TextArray(pnGetStatusMsg());
     $output->Linebreak(2);
 
     // Start options menu

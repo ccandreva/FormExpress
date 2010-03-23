@@ -926,4 +926,25 @@ function FormExpress_shift_weight( $table
 }
 
 
+/**
+ * get available admin panel links
+ *
+ * @author Chris Candreva
+ * @return array array of admin links
+ */
+
+function FormExpress_adminapi_getlinks()
+{
+    $dom = ZLanguage::getModuleDomain('FormExpress');
+    return  array (
+        array ('url' => pnModURL('FormExpress', 'admin', 'new'), 'text' => __('New Form', $dom) ),
+        array ('url' => pnModURL('FormExpress', 'admin', 'view'), 'text' => __('View Form', $dom) ),
+        array ('url' => pnModURL('FormExpress', 'admin', 'import_export'), 'text' => __('Import/Export', $dom) ),
+        array ('url' => pnModURL('FormExpress', 'admin', 'modifyconfig'), 'text' => __('Edit Form Configuration', $dom) ),
+        array ('url' => pnModURL('FormExpress', 'admin', 'view_docs'), 'text' => __('Documentation', $dom) ),
+    );
+}
+
+        
+
 ?>

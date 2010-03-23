@@ -1,0 +1,19 @@
+<!--[*  $Id:                                                             $  *]-->
+
+
+<!--[include file='formexpress_usermenu.html']-->
+
+<table id="feViewForms">
+<tr>
+<th><!--[gt text="Form Name"]--></th>
+<th><!--[gt text="Description"]--></th>
+</tr>
+
+<!--[foreach from=$forms item=item]-->
+<tr>
+<td><a href="<!--[pnmodurl modname='formexpress' type='user' func='display' form_id=$item.form_id ]-->"><!--[$item.form_name]--></a>
+</td>
+<td><!--[$item.description]--></td>
+</tr>
+<!--[/foreach]-->
+</table>

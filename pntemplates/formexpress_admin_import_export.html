@@ -1,0 +1,30 @@
+<!--[*  $Id:                                                             $  *]-->
+
+<!--[include file='formexpress_adminmenu.html']-->
+
+<h2>Import / Export </h2>
+
+<p>
+<form action="<!--[pnmodurl modname='FormExpress' type='admin' func='export']-->"
+	method="post" enctype="application/x-www-form-urlencoded">
+<label for="export_form_id"><!--[gt text="Export Form Name"]--></label>
+<select name="export_form_id" id="export_form_id" size="1" tabindex="1" >
+<!--[foreach from=$export_form_idItems item=item]-->
+<option value="<!--[$item.value]-->"><!--[$item.text]--></option>
+<!--[/foreach]-->
+</select>
+<input name="Export" type="submit" value="Submit" tabindex="2" />
+</form>
+</p>
+
+<p>
+<!--[pnform cssClass="FormExpress" enctype='multipart/form-data']-->
+<!--[pnformlabel for=import_file_name __text='Import File Name']-->
+<input type="hidden" name="MAX_FILE_SIZE" value="100000" />
+<!--[pnformuploadinput id="import_file_name" size="32" tabindex="3" ]-->
+<!--[pnformbutton commandName="submit" __text="Submit" tabindex='4']-->
+
+<!--[pnformvalidationsummary]-->
+
+<!--[/pnform]-->
+</p>

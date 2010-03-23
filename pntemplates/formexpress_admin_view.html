@@ -1,0 +1,23 @@
+<!--[*  $Id:                                                             $  *]-->
+
+<!--[include file='formexpress_adminmenu.html']-->
+
+<h2><!--[gt text='View Forms']--></h2>
+
+<table id="feViewForms" >
+<tr> 
+  <th><!--[gt text='Form Name']--></th>
+  <th><!--[gt text='Description']--></th>
+  <th><!--[gt text='Options']--></th>
+</tr>
+
+<!--[foreach from=$forms item=item]--> 
+<tr>
+  <td><!--[$item.form_name]--></td>
+  <td><!--[$item.description]--></td>
+  <td class="feOptions"><!--[$item.options]--></td>
+</tr>
+<!--[/foreach]-->
+</table>
+ 
+  

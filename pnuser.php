@@ -1,53 +1,44 @@
 <?php
-// $Id: pnuser.php,v 1.2 2002/06/29 10:38:59 philip Exp $
-// ----------------------------------------------------------------------
-// FormExpress module for POST-NUKE Content Management System
-// Copyright (C) 2002 by Stutchbury Limited
-// http://www.stutchbury.net/
-// ----------------------------------------------------------------------
-// Based on:
-// PHP-NUKE Web Portal System - http://phpnuke.org/
-// Thatware - http://thatware.org/
-// ----------------------------------------------------------------------
-// LICENSE
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License (GPL)
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WIthOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// To read the license please visit http://www.gnu.org/copyleft/gpl.html
-// ----------------------------------------------------------------------
-// Original Author of file: Philip Fletcher
-// Purpose of file:  FormExpress user display functions
-// ----------------------------------------------------------------------
-
-$ModName = basename( dirname( __FILE__ ) );
-
-include_once( "modules/$ModName/pnclass/FXSession.php" );
-include_once( "modules/$ModName/pnclass/FXCache.php" );
-include_once( "modules/$ModName/pnclass/FXHtml.php" );
+/**
+ * FormExpress : Build forms for Zikula through a web interface
+ *
+ * @copyright (c) 2002 Stutchbury Limited, 2010 Chris Candreva
+ * @Version $Id:                                              $
+ * @license GNU/GPL - http://www.gnu.org/copyleft/gpl.html
+ * @package FormExpress
+ *
+ *
+ * Origianally written by Philip Fletcher for PostNuke
+ * Updated for Zikula API by Christopher X. Candreva
+ *
+ * LICENSE
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License (GPL)
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WIthOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * To read the license please visit http: *www.gnu.org/copyleft/gpl.html
+ * ----------------------------------------------------------------------
+ * Purpose of file:  FormExpress user display functions
+ * ----------------------------------------------------------------------
+ */
+ 
+include_once( 'pnclass/FXSession.php' );
+include_once( 'pnclass/FXCache.php' );
+include_once( 'pnclass/FXHtml.php' );
 
 /**
- * the main user function
- * This function is the default function, and is called whenever the module is
- * initiated without defining arguments.  As such it can be used for a number
- * of things, but most commonly it either just shows the module menu and
- * returns or calls whatever the module designer feels should be the default
- * function (often this is the view() function)
+ * The main function either displays the default form,
+ * or the list of forms if no defauls is defined.
  */
 function FormExpress_user_main()
 {
-    // Create output object - this object will store all of our output so that
-    // we can return it easily when required
-    $output = new FXHtml();
-
-    
     // Security check - important to do this as early as possible to avoid
     // potential security holes or just too much wasted processing.  For the
     // main function we want to check that the user has at least overview
@@ -56,14 +47,11 @@ function FormExpress_user_main()
     // level of access for administration depends on the particular module, but
     // it is generally either 'overview' or 'read'
     if (!pnSecAuthAction(0, 'FormExpress::', '::', ACCESS_READ)) {
-        $output->Text(_FORMEXPRESSNOAUTH);
-        return $output->GetOutput();
+        return __("Not authorised to access FormExpress module");
     }
 
-    // Add menu to output - it helps if all of the module pages have a standard
-    // menu at their head to aid in navigation
     $default_form_id = pnModGetVar('FormExpress', 'default_form_id');
-    if ( $default_form_id != '-1' ) {
+    if ( $default_form_id >0 ) {
         return ( pnModFunc ( 'FormExpress'
                            , 'user'
                            , 'display_form'
@@ -73,105 +61,45 @@ function FormExpress_user_main()
                            )
                );
     } else {
-        $output->SetInputMode(_PNH_VERBATIMINPUT);
-        $output->Text(FormExpress_usermenu());
-        $output->SetInputMode(_PNH_PARSEINPUT);
-
-        // Return the output that has been generated by this function
-        return $output->GetOutput();
+        return  pnModFunc ( 'FormExpress'
+                           , 'user'
+                           , 'view'
+               );
     }
 }
 
 /**
  * view items
- * This is a standard function to provide an overview of all of the items
- * available from the module.
+ * Show a user view of all defined forms.
  */
 function FormExpress_user_view()
 {
-    // Get parameters from whatever input we need.  All arguments to this
-    // function should be obtained from pnVarCleanFromInput(), getting them
-    // from other places such as the environment is not allowed, as that makes
-    // assumptions that will not hold in future versions of PostNuke
-
-    // Create output object - this object will store all of our output so that
-    // we can return it easily when required
-    $output = new FXHtml();
-
-    // Add menu to output - it helps if all of the module pages have a standard
-    // menu at their head to aid in navigation
-    $output->SetInputMode(_PNH_VERBATIMINPUT);
-    $output->Text(FormExpress_usermenu());
-    $output->SetInputMode(_PNH_PARSEINPUT);
-
-    // Security check - important to do this as early as possible to avoid
-    // potential security holes or just too much wasted processing
-    if (!pnSecAuthAction(0, 'FormExpresss::', '::', ACCESS_OVERVIEW)) {
-        $output->Text(_FORMEXPRESSNOAUTH);
-        return $output->GetOutput();
+    // Security check - important to do this as early as possible.
+    if (!SecurityUtil::checkPermission('FormExpresss::', '::', ACCESS_OVERVIEW)) {
+        return LogUtil::registerPermissionError();
     }
 
-    // Load API.  All of the actual work for obtaining information on the items
-    // is done within the API, so we need to load that in before we can do
-    // anything.  If the API fails to load an appropriate error message is
-    // posted and the function returns
-    if (!pnModAPILoad('FormExpress', 'user')) {
-        $output->Text(_LOADFAILED);
-        return $output->GetOutput();
-    }
+    /* Get all forms via API */
+    $items = pnModAPIFunc( 'FormExpress', 'user', 'getall' );
 
-    // The API function is called.  The arguments to the function are passed in
-    // as their own arguments array
-    $items = pnModAPIFunc( 'FormExpress'
-                         , 'user'
-                         , 'getall'
-                         );
-
-    // The return value of the function is checked here, and if the function
-    // suceeded then an appropriate message is posted.  Note that if the
-    // function did not succeed then the API function should have already
-    // posted a failure message so no action is required
     if ($items == false) {
-        $output->Text(_FORMEXPRESSFORMFAILED);
+        return LogUtil::registerError( __("No forms found."), 500) ;
     }
 
-    // Loop through each item and display it.  Note the use of pnVarCensor() to
-    // remove any words from the name that the administrator has deemed
-    // unsuitable for the site
-    $output->SetInputMode(_PNH_VERBATIMINPUT);
-    $output->TableStart( ''
-                       , array( _FORMEXPRESSNAME
-                              , _FORMEXPRESSDESCRIPTION
-                              )
-                       , 0
-                       );
+    /* Check permissions on each form, so we only show forms
+     * for which the user has permission.
+     */
+    $forms = array();
     foreach ($items as $item) {
-                //$row[] = $item['form_name'];
-                //$row[] = $item['description'];
-        
-        $row = array();
-        if (pnSecAuthAction(0,
-                            'FormExpresss::',
-                            "$item[form_name]::$item[form_id]",
-                            ACCESS_READ)) {
-            //$output->URL(pnModURL('FormExpress',
-            $output->SetOutputMode(_PNH_RETURNOUTPUT);
-            $row[] = $output->URL(pnModURL('FormExpress',
-                                  'user',
-                                  'display',
-                                  array('form_id' => $item['form_id'])),
-                         pnVarPrepForDisplay(pnVarCensor($item['form_name'])));
-            $row[] = $item['description'];
-            $output->SetOutputMode(_PNH_KEEPOUTPUT);
-            $output->TableAddRow($row, 'left', 'top');
-            //$output->Linebreak();
+        if (SecurityUtil::checkPermission('FormExpresss::', "$item[form_name]::$item[form_id]", ACCESS_READ)) {
+            $forms[] = $item;
         }
     }
-    $output->TableEnd();
-    $output->SetInputMode(_PNH_PARSEINPUT);
 
+    $render = pnRender::getInstance('FormExpress');
+    $render->assign('forms', $forms);
     // Return the output that has been generated by this function
-    return $output->GetOutput();
+    return $render->fetch('formexpress_user_view.html');
 }
 
 /**
@@ -181,66 +109,43 @@ function FormExpress_user_view()
  */
 function FormExpress_user_display($args)
 {
-    // Get parameters from whatever input we need.  All arguments to this
-    // function should be obtained from pnVarCleanFromInput(), getting them
-    // from other places such as the environment is not allowed, as that makes
-    // assumptions that will not hold in future versions of PostNuke.
-    list($form_id,
-         $objectid) = pnVarCleanFromInput('form_id',
-                                          'objectid');
-
-    // At this stage we check to see if we have been passed $objectid, the
-    // generic item identifier.  This could have been passed in by a hook or
-    // through some other function calling this as part of a larger module, but
-    // if it exists it overrides $tid
-    //
-    // Note that this module couuld just use $objectid everywhere to avoid all
-    // of this munging of variables, but then the resultant code is less
-    // descriptive, especially where multiple objects are being used.  The
-    // decision of which of these ways to go is up to the module developer
-    if (!empty($objectid)) {
-        $form_id = $objectid;
+    if (!SecurityUtil::checkPermission('FormExpresss::', '::', ACCESS_READ)) {
+        return LogUtil::registerPermissionError();
     }
 
-    // User functions of this type can be called by other modules.  If this
-    // happens then the calling module will be able to pass in arguments to
-    // this function through the $args parameter.  Hence we extract these
-    // arguments *after* we have obtained any form-based input through
-    // pnVarCleanFromInput().
-    extract($args);
+    $form_id = FormUtil::getPassedValue('form_id');
 
-    // Create output object - this object will store all of our output so that
-    // we can return it easily when required
-    $output = new FXHtml();
+    $render = pnRender::getInstance('FormExpress');
 
-    // Add menu to output - it helps if all of the module pages have a standard
-    // menu at their head to aid in navigation
-    $output->SetInputMode(_PNH_VERBATIMINPUT);
-    $output->Text(FormExpress_usermenu());
-    $output->SetInputMode(_PNH_PARSEINPUT);
+    //Get the form from the cache
+    $fxCache = new FXCache();
+    $form = $fxCache->getForm($form_id);
 
-    $output->Title($form['form_name']);
+    $fxSession = new FXSession();
+    $form['user_data'] = $fxSession->getForm($form_id);
 
-    $output->SetInputMode(_PNH_VERBATIMINPUT);
-    $output->Text(FormExpress_user_display_form(array( 'form_id' => $form_id)));
-    $output->SetInputMode(_PNH_PARSEINPUT);
+    /**
+     *  We need to know the relative position of the 'next' item, which 
+     *  is not available in the format originally developed for the table format.
+     *  We add it here.
+     */
+    $max = count($form['items']) - 1;
+    /* Set first item position to be 'below' */
+    $form['items'][0]['relative_position'] = 'below';
+    $form['items'][0]['isfirst'] = true;
+    $form['items'][$max]['islast'] = true;
+    for ($i=0; $i<$max; $i++) {
+      $form['items'][$i]['next_position'] = $form['items'][$i+1]['relative_position'];
+      $form['items'][$i]['Num'] = $i;
+    }
+    $render->assign_by_ref('form', $form);
 
-    // Let any hooks know that we are displaying an item.  As this is a display
-    // hook we're passing a URL as the extra info, which is the URL that any
-    // hooks will show after they have finished their own work.  It is normal
-    // for that URL to bring the user back to this function
-    $output->SetInputMode(_PNH_VERBATIMINPUT);
-    $output->Text(pnModCallHooks('item',
-                                 'display',
-                                 $form_id,
-                                 pnModURL('FormExpress',
-                                          'user',
-                                          'display',
-                                          array('form_id' => $form_id))));
-    $output->SetInputMode(_PNH_PARSEINPUT);
+//  Set this to show the edit links, used when called from admin
+//    $render->assign('ShowEditLinks', '1');        
 
     // Return the output that has been generated by this function
-    return $output->GetOutput();
+    return $render->fetch('formexpress_user_display.html');
+
 }
 
 /**
@@ -281,14 +186,6 @@ function FormExpress_user_display_form($args) {
     // we can return it easily when required
     $output = new FXHtml();
 
-    // Load API.  All of the actual work for obtaining information on the items
-    // is done within the API, so we need to load that in before we can do
-    // anything.  If the API fails to load an appropriate error message is
-    // posted and the function returns
-    if (!pnModAPILoad('FormExpress', 'user')) {
-        $output->Text(_LOADFAILED);
-        return $output->GetOutput();
-    }
 
     //Check for permissions
     if ( (!pnSecAuthAction(0, 'FormExpress::', "$form_id::", ACCESS_READ))) {
@@ -308,7 +205,7 @@ function FormExpress_user_display_form($args) {
     //}
 
     //Display the form
-    //$output->Title($form['form_name']);
+    $output->Title($form['form_name']);
 
     $output->SetInputMode(_PNH_VERBATIMINPUT);
     $output->TextArray(pnGetStatusMsg());
@@ -442,41 +339,6 @@ function FormExpress_user_display_form($args) {
 }
 
 
-/**
- * generate menu fragment
- */
-function FormExpress_usermenu()
-{
-    // Create output object - this object will store all of our output so that
-    // we can return it easily when required
-    $output = new FXHtml();
-
-    // Display status message if any.  Note that in future this functionality
-    // will probably be in the theme rather than in this menu, but this is the
-    // best place to keep it for now
-
-    // Start options menu
-    $output->TextArray(pnGetStatusMsg());
-    $output->Linebreak(2);
-
-    // Menu options.  These options are all added in a single row, to add
-    // multiple rows of options the code below would just be repeated
-    $output->TableStart(_FORMEXPRESS);
-    $output->SetOutputMode(_PNH_RETURNOUTPUT);
-    $columns = array();
-    $columns[] = $output->URL(pnModURL('FormExpress',
-                                       'user',
-                                       'view'),
-                              _FORMEXPRESSVIEW);
-    $output->SetOutputMode(_PNH_KEEPOUTPUT);
-    $output->SetInputMode(_PNH_VERBATIMINPUT);
-    $output->TableAddRow($columns);
-    $output->SetInputMode(_PNH_PARSEINPUT);
-    $output->TableEnd();
-
-    // Return the output that has been generated by this function
-    return $output->GetOutput();
-}
 function FormExpress_user_get_item_options($item) {
     if ( (!pnSecAuthAction(0, 'FormExpress::', '::', ACCESS_EDIT))
        ||(!function_exists('formexpress_admin_get_item_options'))
@@ -650,6 +512,7 @@ function FormExpress_user_show_input($item) {
                                    , $item['item_attributes']
                                    );
         break;
+
     case 'text':
         //$output->Text('TEXT');
         $output->FormText( $item['item_name'].$item['suffix']
@@ -753,28 +616,13 @@ function FormExpress_user_submit_form() {
     // proceed no further as it is possible that this is an attempt at sending
     // in false data to the system
     if (!pnSecConfirmAuthKey()) {
-/*
-        $output->Text(_BADAUTHKEY);
-        $output->LineBreak(2);
-        $output->URL(pnModURL('FormExpress', 'user', 'view'),_FORMEXPRESSVIEW);
-        return $output->GetOutput();
-*/
 	$pnRender = new pnRender('FormExpress');
 	return $pnRender->fetch('formexpress_user_submit_form_badkey.html');
     }
 
-    $form_id = pnVarCleanFromInput('form_id');
+    $form_id = FormUtil::getPassedValue('form_id');
 
     //// Get all the form, item and input data ////
-
-    // Load API.  All of the actual work for obtaining information on the items
-    // is done within the API, so we need to load that in before we can do
-    // anything.  If the API fails to load an appropriate error message is
-    // posted and the function returns
-    if (!pnModAPILoad('FormExpress', 'user')) {
-        $output->Text(_LOADFAILED);
-        return $output->GetOutput();
-    }
 
     //Get the form from the cache
     $fxCache = new FXCache();
@@ -792,9 +640,9 @@ function FormExpress_user_submit_form() {
             $input_name = $item['item_name'].$form['input_name_suffix'];
             //!TODO Need to do something for SelectMultple when 
             //pnVarCleanFromInput supports it...
-            //$form['items'][$item['form_item_id']]['user_data'] = pnVarCleanFromInput($input_name);
-            $user_data[$item['item_name']] = pnVarCleanFromInput($input_name);
-            //$user_data[$item['item_name']] = pnVarCleanFromInput(&$input_name);
+            //$form['items'][$item['form_item_id']]['user_data'] = FormUtil::getPassedValue(($input_name);
+            $user_data[$item['item_name']] = FormUtil::getPassedValue($input_name);
+            //$user_data[$item['item_name']] = FormUtil::getPassedValue((&$input_name);
             //Check the required fields
             if ( ($item['required'])
                //&&(empty($form['items'][$item['form_item_id']]['user_data']))
@@ -1057,13 +905,18 @@ function FormExpress_user_showPage($args) {
  * Sample implementation of a Formexpress backend (experimental)
  */
 function FormExpress_user_sendmail($args) {
-    extract($args);
 
-    if (!isset($email_address) || empty($email_address) ) {
-        pnSessionSetVar('errormsg', _FORMEXPRESSEMAILADDRERROR);
+    $dom = ZLanguage::getModuleDomain('FormExpress');
+    // extract($args);
+    
+    if (isset($args['email_address']) || empty($args['email_address']) ) {
+        $email_address = $args['email_address'];
+    } else {
+        pnSessionSetVar('errormsg', __('No email address found. Please check your Form action syntax.', $dom));
         return false;
     }
-
+    if (isset($args['replymail'])) $replymail = $args['replymail'];
+    
     $fxSession = new FXSession();
     $form_id = $fxSession->getSubmittedFormID();
     $user_data = $fxSession->getForm($form_id);
@@ -1081,8 +934,9 @@ function FormExpress_user_sendmail($args) {
     $message_id = time();
 
     $adminmail = pnConfigGetVar('adminmail');
-    $message = _FORMEXPRESSEMAILHEADER."\n\n";
+    // $message = _FORMEXPRESSEMAILHEADER."\n\n";
     $message .= _FORMEXPRESSEMAILID."$message_id\n\n";
+    $message = __('Mail ID = ', $dom) . $message_id . "\n\n";
     $dup_list = array();
     $replymail;
     foreach($form['items'] AS $item) {
@@ -1098,50 +952,39 @@ function FormExpress_user_sendmail($args) {
             }
         }
     }
-    $message = $message."\n\n"._FORMEXPRESSEMAILFOOTER;
+
+    // $message = $message."\n\n"._FORMEXPRESSEMAILFOOTER;
     //Cannot use pnMail, because it does not return true or false...
     if (   mail( $email_address
-               , $message_id.': '.$form['form_name']
+               , __('Results from form ', $dom) . $form['form_name']
                , $message
-               //, "From: $adminmail\r\nReply-to: \r\n"
                , "From: ".$adminmail."\r\nReply-to: ".($replymail ? $replymail : $adminmail)."\r\n"
                )
        ) {
+
         pnSessionSetVar('FORMEXPRESSSUBMITID',  $message_id);
-        //Clear the user session data
+
+        /* Clear the user session data */
         $fxSession->delForm($form_id);
         return true;
+
     } else {
-        pnSessionSetVar('errormsg', _FORMEXPRESSEMAILSENDERROR);
-        //return _FORMEXPRESSEMAILSENDERROR;
+        pnSessionSetVar('errormsg', __('Mail transport failure',$dom));
         return false;
     }
 }
 
-function FormExpress_user_display_message($args) {
-   extract($args);
-   $submit_id =  pnSessionGetVar('FORMEXPRESSSUBMITID');
+/**
+ * Display a formatted message.
+ * This is the function called by the submit handler
+ */
+function FormExpress_user_display_message($args)
+{
+   $render = pnRender::getInstance('FormExpress');
+   $render->assign('message', $args['message'] );
+   $render->assign('submitid', pnSessionGetVar('FORMEXPRESSSUBMITID') );
    pnSessionDelVar('FORMEXPRESSSUBMITID');
-   $output = new FXHtml();
-   $output->SetInputMode(_PNVERBATIMINPUT);
-   $output->Text($message . ' ' . $submit_id);
-   return $output->GetOutput();
-}
-function FormExpress_user_navigate($args) {
-    extract($args);
-
-    //Get the current form details from session
-
-    //If the 'submitprevious' is set, then go to prev form (if there is one)
-
-    //else if the 'FXNextForm is specified, then  use this
-    //     else use 'formname' from args
-
-    //Get the form details and display
-
-    $output = new FXHtml();
-    $output->Text('This is the next form');
-    return $output->GetOutput();
+   return $render->fetch('formexpress_user_display_message.html');;   
 }
 
 ?>

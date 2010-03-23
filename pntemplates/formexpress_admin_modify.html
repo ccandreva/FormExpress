@@ -1,0 +1,56 @@
+<!--[*  $Id:                                                             $  *]-->
+
+<!--[include file='formexpress_adminmenu.html']-->
+
+<h2><!--[gt text='Add a new Form']--></h2>
+
+<!--[pnform cssClass="FormExpress"]-->
+
+  <!--[pnformvalidationsummary]-->
+
+  <!--[if $errormsg != '']-->
+    <div class="validationSummary pn-errormsg">
+    <!--[$errormsg]-->
+    </div>
+  <!--[/if]-->
+
+  <ul class="FEl1 labelleftcol">
+    <li>
+      <!--[pnformlabel for=form_name __text="Form Name" ]-->
+      <!--[pnformtextinput id=form_name width=30em maxLength=50 mandatory=1]-->
+    </li>
+    <li>
+      <!--[pnformlabel for=description __text="Description"]-->
+      <!--[pnformtextinput id=description width=30em textMode='multiline' 
+      		cols='50' rows='4' mandatory=1]-->
+    </li>
+    <li>
+      <!--[pnformlabel for=submit_action __text="Submit Action"]-->
+      <!--[pnformtextinput id=submit_action width=30em textMode='multiline' 
+      		cols='50' rows='4' mandatory=1]-->
+    </li>
+    <li>
+      <!--[pnformlabel for=success_action __text="Success Action"]-->
+      <!--[pnformtextinput id=success_action width=30em textMode='multiline' 
+      		cols='50' rows='4' mandatory=1]-->
+    </li>
+    <li>
+      <!--[pnformlabel for=failure_action __text="Failure Action"]-->
+      <!--[pnformtextinput id=failure_action width=30em textMode='multiline' 
+      		cols='50' rows='4' mandatory=1]-->
+    </li>
+
+    <li>
+      <!--[pnformlabel for=language __text="Language"]-->
+      <!--[pnformdropdownlist id=language ]-->
+    </li>
+    <li>
+      <!--[pnformlabel for=active __text="Active"]-->
+      <!--[pnformcheckbox id=active]-->
+    </li>
+
+    <li><!--[pnformbutton commandName="submit" __text="Submit" ]--></li>
+
+  </ul>
+
+<!--[/pnform]-->

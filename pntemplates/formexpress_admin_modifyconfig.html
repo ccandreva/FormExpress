@@ -1,0 +1,27 @@
+<!--[*  $Id:                                                             $  *]-->
+
+<!--[include file='formexpress_adminmenu.html']-->
+
+<h2><!--[gt text='Modify Form Configuration']--></h2>
+
+<!--[pnform cssClass="FormExpress"]-->
+
+  <!--[pnformvalidationsummary]-->
+
+  <!--[if $errormsg != '']-->
+    <div class="validationSummary pn-errormsg">
+    <!--[$errormsg]-->
+    </div>
+  <!--[/if]-->
+
+  <ul class="FEl1 labelleftcol">
+    <li>
+      <!--[pnformlabel for=default_form_id __text="Default Form (will be used if FormExpress is the home page)"]-->
+      <!--[pnformdropdownlist id=default_form_id ]-->
+    </li>
+
+    <li><!--[pnformbutton commandName="submit" __text="Submit" ]--></li>
+
+  </ul>
+
+<!--[/pnform]-->

@@ -1,0 +1,55 @@
+<!--[*  $Id:                                                             $  *]-->
+
+
+<!--[include file='formexpress_adminmenu.html']-->
+
+<h2>Name: <!--[$form.form_name]--></h2>
+
+<form action="<!--[pnmodurl modname='FormExpress' type='admin' func='item_new']-->"
+	method="post" class="FormExpress">
+<input type="hidden" name="authid" value="<!--[insert name="generateauthkey"
+        module="FormExpress" ]-->" />
+<input type="hidden" name="form_id" value="<!--[$form.form_id]-->" />
+<p>
+<label for="item_type"><!--[gt text="Add new"]--></label>
+<select id="item_type" name="item_type">
+<!--[foreach from=$item_typeItems item=item]-->
+<option value="<!--[$item.value]-->"><!--[$item.text]--></option>
+<!--[/foreach]-->
+</select>
+<label for="required_sequence"><!--[gt text='before']--></label>
+<select id="required_sequence" name="required_sequence">
+<!--[foreach from=$required_sequenceItems item=item]-->
+<option value="<!--[$item.value]-->"><!--[$item.text]--></option>
+<!--[/foreach]-->
+<option value="" selected><!--[gt text="End of form"]--></option>
+</select>
+<input type="submit" name="submit" value="Submit">
+</p>
+</form>
+
+<!--[include file='formexpress_showform.html']-->
+
+<br clear="left" />
+<p>
+<!--[gt text='User View of this form (copy link to menu)' assign=uvtext]-->
+<a href="<!--[pnmodurl modname='FormExpress' type='user' func='display_form' form_id=$form.form_id]-->"
+title="<!--[$uvtext]-->"><!--[$uvtext]--></a>
+</p>
+
+<table width="100%" border="1">
+<tr><th colspan="3"><!--[gt text='Inactive Items']--></th></tr>
+<tr>
+  <th><!--[gt text='Prompt']--></th>
+  <th><!--[gt text='Type']--></th>
+  <th><!--[gt text='Item Options']--></th>
+</tr>
+
+<!--[foreach from=$inactive item=item]-->
+<tr>
+<td><!--[$item.prompt]--></td>
+<td><!--[$item.item_type]--></td>
+<td><!--[feEditLink item=$item]--></td>
+</tr>
+<!--[/foreach]-->
+</table>

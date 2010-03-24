@@ -763,6 +763,8 @@ function FormExpress_get_radio_input_list( $form_id
         $input_list[] = array( 'id' => $input_name
                              , 'selected' => 0
                              , 'name' => $input_name
+                             , 'text' => $input_name
+                             , 'value' => $input_name
                              );
     }
     return $input_list;

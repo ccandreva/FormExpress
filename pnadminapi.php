@@ -725,6 +725,16 @@ function FormExpress_adminapi_item_delete($args)
     return true;
 }
 
+
+
+/* Stub to put old call into API namespace */
+function FormExpress_adminapi_get_radio_input_list( $args )
+{
+  $form_id = $args['id'];
+  return FormExpress_get_radio_input_list($form_id);
+}
+
+
 function FormExpress_get_radio_input_list( $form_id
                                          ) {
     if ( (empty($form_id))

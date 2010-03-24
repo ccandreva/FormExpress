@@ -539,7 +539,7 @@ function FormExpress_adminapi_item_update($args)
     // appropriate item.  If the item does not exist we post an appropriate
     // message and return
     $item = pnModAPIFunc('FormExpress',
-            'user',
+            'admin',
             'item_get',
             array('form_item_id' => $form_item_id));
 
@@ -669,7 +669,7 @@ function FormExpress_adminapi_item_delete($args)
     // appropriate item.  If the item does not exist we post an appropriate
     // message and return
     $item = pnModAPIFunc('FormExpress',
-            'user',
+            'admin',
             'item_get',
             array('form_item_id' => $form_item_id));
 

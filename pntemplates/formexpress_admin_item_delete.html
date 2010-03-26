@@ -1,0 +1,20 @@
+<!--[*  $Id:                                                             $  *]-->
+
+<!--[include file='formexpress_adminmenu.html']-->
+
+<h2><!--[gt text='Delete Form Item']--></h2>
+
+<form method="post" enctype="application/x-www-form-urlencoded"
+ 	action="<!--[pnmodurl modname='FormExpress' type='admin' func='item_delete']-->">
+
+<p><!--[gt text='Are you sure you wish to delete the item']--> "<!--[$item_name]-->" ?
+</p>
+<input type="hidden" name="form_item_id" value="<!--[$form_item_id]-->"/>
+<input type="hidden" name="confirmation" value="1"/>
+<input type="hidden" name="authid" 
+	value="<!--[insert name="generateauthkey" module="FormExpress" ]-->" />
+<p><input type="submit" value="Confirm" tabindex="1" /></p>
+<p><a href="<!--[pnmodurl modname='FormExpress' type='admin' func='items_view' 
+	form_id=$form_id]-->" title="Cancel deletion">Cancel deletion</a>
+</p>
+</form>

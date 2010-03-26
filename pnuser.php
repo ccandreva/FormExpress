@@ -138,7 +138,7 @@ function FormExpress_user_display($args)
       $form['items'][$i]['next_position'] = $form['items'][$i+1]['relative_position'];
       $form['items'][$i]['Num'] = $i;
     }
-    $render->assign_by_ref('form', $form);
+    $render->assign('form', $form);
 
 //  Set this to show the edit links, used when called from admin
 //    $render->assign('ShowEditLinks', '1');        

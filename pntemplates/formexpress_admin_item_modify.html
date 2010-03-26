@@ -1,0 +1,124 @@
+<!--[*  $Id:                                                             $  *]-->
+
+<!--[include file='formexpress_adminmenu.html']-->
+
+<h2><!--[gt text='Edit Form Item']--></h2>
+
+<!--[pnform cssClass="FormExpress"]-->
+
+  <!--[pnformvalidationsummary]-->
+
+<!--[* <input type="hidden" name="form_id" value="<!--[$form_id]-->" />
+<input type="hidden" name="item_type" value="<!--[$item_type]-->" />
+<input type="hidden" name="required_sequence" value="<!--[$required_sequence]-->" />
+<input type="hidden" name="form_item_id" value="<!--[$form_item_id]-->" />
+*]-->
+
+  <!--[if $errormsg != '']-->
+    <div class="validationSummary pn-errormsg">
+    <!--[$errormsg]-->
+    </div>
+  <!--[/if]-->
+
+  <ul class="FEl1 labelleftcol">
+    <li>
+    	<span class="labelleftcol">Type:</span> <!--[$item_type]-->
+    </li>
+    
+    <!--[if $display.item_name]-->
+        <li>
+	<!--[pnformlabel for=item_name __text="Name" ]-->
+	<!--[if $form_item.item_type == 'radio']-->
+		<!--[pnformdropdownlist id=item_name_pick ]-->
+	<!--[/if]-->	
+	<!--[pnformtextinput id=item_name width=30em maxLength=50 mandatory=1]-->
+	</li>
+    <!--[/if]-->
+
+    <!--[if $display.required]-->
+		<li>
+		<!--[pnformlabel for=required __text="Required ?" ]-->
+		<!--[pnformcheckbox id=required ]-->
+		</li>
+	<!--[/if]-->
+
+    <!--[if $display.prompt]-->
+		<li>
+		<!--[pnformlabel for=prompt __text="Prompt" ]-->
+		<!--[pnformtextinput id=prompt width=30em maxLength=99 mandatory=$display.prompt|feIsMandatory]-->
+		</li>
+	<!--[/if]-->
+
+    <!--[if $display.prompt_position]-->
+		<li>
+		<!--[pnformlabel for=prompt_position __text="Prompt Position"]-->
+		<!--[pnformdropdownlist id=prompt_position ]--> <!--[* mandatory=$display.prompt_position|feIsMandatory *]-->
+		</li>
+	<!--[/if]-->
+
+    <!--[if $display.item_value]-->
+		<li>
+		<!--[pnformlabel for=item_value __text="Value(s)"]-->
+		<!--[pnformtextinput id=item_value width=40em textMode='multiline' cols=50 rows=4 mandatory=$display.item_value|feIsMandatory]-->
+		</li>
+    <!--[/if]-->
+
+    <!--[if $display.default_value]-->
+		<li>
+		<!--[pnformlabel for=default_value __text="Default Value" ]-->
+		<!--[pnformtextinput id=default_value width=40em maxLength=250 mandatory=$display.default_value|feIsMandatory]-->
+		</li>
+	<!--[/if]-->
+
+    <!--[if $display.cols]-->
+		<li>
+		<!--[pnformlabel for=cols __text="Width" ]-->
+		<!--[pnformtextinput id=cols width=5em maxLength=5 mandatory=1]-->
+		</li>
+    <!--[/if]-->
+
+    <!--[if $display.rows]-->
+		<li>
+		<!--[pnformlabel for=rows __text="Height" ]-->
+		<!--[pnformtextinput id=rows width=5em maxLength=5 mandatory=$display.rows|feIsMandatory]-->
+		</li>
+    <!--[/if]-->
+
+    <!--[if $display.max_length]-->
+		<li>
+		<!--[pnformlabel for=max_length __text="Maximum Length" ]-->
+		<!--[pnformtextinput id=max_length width=5em maxLength=5 mandatory=$display.max_length|feIsMandatory]-->
+		</li>
+    <!--[/if]-->
+
+    <!--[if $display.validation_rule]-->
+		<li>
+		<!--[pnformlabel for=validation_rule __text="Validation Rule" ]-->
+		<!--[pnformtextinput id=validation_rule width=40em maxLength=250 ]-->
+		</li>
+	<!--[/if]-->
+
+    <!--[if $display.item_attributes]-->
+		<li>
+		<!--[pnformlabel for=item_attributes __text="Item Attributes" ]-->
+		<!--[pnformtextinput id=item_attributes width=40em maxLength=250 mandatory=$display.item_attributes|feIsMandatory]-->
+		</li>
+	<!--[/if]-->
+
+    <!--[if $display.relative_position]-->
+		<li>
+		<!--[pnformlabel for=prompt_postition __text="Relative Position"]-->
+		<!--[pnformdropdownlist id=relative_position ]-->
+		</li>
+	<!--[/if]-->
+
+    <li>
+      <!--[pnformlabel for=active __text="Active" ]-->
+      <!--[pnformcheckbox id=active ]-->
+    </li>
+
+    <li><!--[pnformbutton commandName="submit" __text="Submit" ]--></li>
+
+  </ul>
+
+<!--[/pnform]-->

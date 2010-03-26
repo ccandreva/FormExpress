@@ -372,7 +372,7 @@ function FormExpress_adminapi_item_create($args)
     if (  (!isset($form_id))
        || (!isset($item_type))
        ) {
-        pnSessionSetVar('errormsg', _MODARGSERROR);
+        pnSessionSetVar('errormsg', _MODARGSERROR . "'$form_id' '$item_type'");
         return false;
     }
 

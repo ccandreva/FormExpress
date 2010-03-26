@@ -32,7 +32,6 @@
 
 include_once( "pnclass/FXSession.php" );
 include_once( "pnclass/FXCache.php" );
-include_once( "pnclass/FXHtml.php" );
 
 Loader::requireOnce('includes/pnForm.php');
 require_once('pnclass/modifyformhandler.php');
@@ -67,8 +66,7 @@ function FormExpress_admin_new()
 
     $render = FormUtil::newpnForm('FormExpress');
     $formobj = new formexpress_admin_modifyformHandler();
-    $output = $render->pnFormExecute('formexpress_admin_modify.html', $formobj);
-    return $output;    
+    return $render->pnFormExecute('formexpress_admin_modify.html', $formobj);
 
 }
 
@@ -95,8 +93,7 @@ function FormExpress_admin_modify($args)
       $formobj->SetFormId($form_id);
     }
     
-    $output = $render->pnFormExecute('formexpress_admin_modify.html', $formobj);
-    return $output;    
+    return $render->pnFormExecute('formexpress_admin_modify.html', $formobj);
 }
 
 
@@ -235,8 +232,7 @@ function FormExpress_admin_modifyconfig()
 
     $render = FormUtil::newpnForm('FormExpress');
     $formobj = new formexpress_admin_modifyconfigHandler();
-    $output = $render->pnFormExecute('formexpress_admin_modifyconfig.html', $formobj);
-    return $output;    
+    return $render->pnFormExecute('formexpress_admin_modifyconfig.html', $formobj);
 
 }
 
@@ -484,8 +480,7 @@ function FormExpress_admin_item_new($args)
         $formobj->setParams( $form_item );
     }
 
-    $output = $render->pnFormExecute('formexpress_admin_item_modify.html', $formobj);
-    return $output;    
+    return $render->pnFormExecute('formexpress_admin_item_modify.html', $formobj);
 }
 
 /**
@@ -563,32 +558,19 @@ function FormExpress_admin_item_create($args)
     }
 
     if (!FormExpress_validate_item_args($form_item)) {
-        $output = new FXHtml();
-        $output->SetInputMode(_PNH_VERBATIMINPUT);
-        $output->Text(pnModFunc('FormExpress'
+        return pnModFunc('FormExpress'
                                , 'admin'
                                , 'item_new'
                                , array( 'form_id' => $form_item['form_id']
                                       , 'item_type' => $form_item['item_type']
                                       , 'form_item' => $form_item
                                       )
-                               )
                      );
-              return $output->GetOutput();
     }
 
     // Notable by its absence there is no security check here.  This is because
     // the security check is carried out within the API function and as such we
     // do not duplicate the work here
-
-    // Load API.  All of the actual work for the creation of the new item is
-    // done within the API, so we need to load that in before we can do
-    // anything.  If the API fails to load an appropriate error message is
-    // posted and the function returns
-    if (!pnModAPILoad('FormExpress', 'admin')) {
-        pnSessionSetVar('errormsg', _LOADFAILED);
-        return $output->GetOutput();
-    }
 
     // The API function is called.  Note that the name of the API function and
     // the name of this function are identical, this helps a lot when
@@ -662,8 +644,7 @@ function FormExpress_admin_item_modify($args)
         $formobj->setParams( array('form_item_id' => $form_item_id, 'func' => 'modify') );
     }
 
-    $output = $render->pnFormExecute('formexpress_admin_item_modify.html', $formobj);
-    return $output;    
+    return $render->pnFormExecute('formexpress_admin_item_modify.html', $formobj);
 }
 
 /**
@@ -758,53 +739,18 @@ function FormExpress_admin_item_update($args)
     }
 
     if (!FormExpress_validate_item_args($form_item)) {
-        $output = new FXHtml();
-        $output->SetInputMode(_PNH_VERBATIMINPUT);
-        $output->Text(pnModFunc('FormExpress'
+        return pnModFunc('FormExpress'
                                , 'admin'
                                , 'item_modify'
                                , array( 'form_id' => $form_item['form_id']
                                       , 'item_type' => $form_item['item_type']
                                       , 'form_item' => $form_item
                                       )
-                               )
                      );
-              return $output->GetOutput();
     }
 
-    //if (!FormExpress_validate_item_args($form_item)) { 
-    //      $output = new FXHtml();
-    //      $output->Text(_FORMEXPRESSVALARDSERROR);
-    //      return $output->GetOutput();
-    //    }
-    // Notable by its absence there is no security check here.  This is because
-    // the security check is carried out within the API function and as such we
-    // do not duplicate the work here
-
-    // Load API.  All of the actual work for the update of the new item is done
-    // within the API, so we need to load that in before we can do anything.
-    // If the API fails to load an appropriate error message is posted and the
-    // function returns
-    if (!pnModAPILoad('FormExpress', 'admin')) {
-        pnSessionSetVar('errormsg', _LOADFAILED);
-        return $output->GetOutput();
-    }
-
-    // The API function is called.  Note that the name of the API function and
-    // the name of this function are identical, this helps a lot when
-    // programming more complex modules.  The arguments to the function are
-    // passed in as their own arguments array.
-    //
-    // The return value of the function is checked here, and if the function
-    // suceeded then an appropriate message is posted.  Note that if the
-    // function did not succeed then the API function should have already
-    // posted a failure message so no action is required
-    if(pnModAPIFunc( 'FormExpress'
-                   , 'admin'
-                   , 'item_update'
-                   , $form_item
-                   )
-       ) {
+    // The API function is called.
+    if(pnModAPIFunc( 'FormExpress', 'admin', 'item_update', $form_item) ) {
         // Success
 
         //We just want to clear the cache for this form.
@@ -839,10 +785,6 @@ function FormExpress_admin_item_delete($args)
 
     // User functions of this type can be called by other modules.
     extract($args);
-
-    // Create output object - this object will store all of our output so
-    // that we can return it easily when required
-    $output = new FXHtml();
 
     // We need the item name to check permissions
     $form_item = pnModAPIFunc('FormExpress', 'admin', 'item_get',
@@ -949,85 +891,11 @@ function FormExpress_validate_item_args(&$form_item) {
         return true;
     }
 
-/**
- * Show item options
- */
-function FormExpress_admin_get_item_options($item, $item_weight_range) {
-    // Create output object - this object will store all of our output so that
-    // we can return it easily when required
-    $output = new FXHtml();
-//Start of options
-            // Options for the item.  Note that each item has the appropriate
-            // levels of authentication checked to ensure that it is suitable
-            // for display
-
-            $options = array();
-            $output->SetInputMode(_PNH_VERBATIMINPUT);
-            $output->SetOutputMode(_PNH_RETURNOUTPUT);
-            //$output->SetOutputMode(_PNH_KEEPOUTPUT);
-            if (pnSecAuthAction(0, 'FormExpress::', "$item[item_name]::$item[form_item_id]", ACCESS_EDIT)) {
-                $options[] = $output->URL(pnModURL('FormExpress',
-                                                   'admin',
-                                                   'item_modify',
-                                                   array('form_item_id' => $item['form_item_id'])),
-                                          '<img src="' . _FORMEXPRESSEDITICON . '" alt="' . _EDIT . '" border="0"/>'
-					  );
-                if (pnSecAuthAction(0, 'FormExpress::', "$item[item_name]::$item[form_item_id]", ACCESS_DELETE)) {
-                    $options[] = $output->URL(pnModURL('FormExpress',
-                                                       'admin',
-                                                       'item_delete',
-                                                       array('form_item_id' => $item['form_item_id'])),
-                                          '<img src="' . _FORMEXPRESSDELETEICON . '" alt="' . _DELETE . '" border="0" />'
-					  );
-                }
-                if ( isset($item_weight_range) ) {
-                    if ( $item['sequence'] > $item_weight_range['min'] ) {
-                        $options[] = $output->URL( pnModURL( 'FormExpress'
-                                                           , 'admin'
-                                                           , 'shift_item_weight'
-                                                           , array( 'form_id' => pnVarPrepForStore($item['form_id'])
-                                                                  , 'form_item_id' => pnVarPrepForStore($item['form_item_id'])
-                                                                  , 'action' => 'lighter'
-                                                                  , 'authid' => pnSecGenAuthKey() 
-                                                                  )
-                                                           )
-                                                 , '<img src="' . _FORMEXPRESSMOVEUPICON . '" alt="' . _FORMEXPRESSMOVEUP . '"  border="0"/>'
-                                                 );
-                    }
-                    if ( $item['sequence'] < $item_weight_range['max'] ) {
-                        $options[] = $output->URL( pnModURL( 'FormExpress'
-                                                           , 'admin'
-                                                           , 'shift_item_weight'
-                                                           , array( 'form_id' => pnVarPrepForStore($item['form_id'])
-                                                                  , 'form_item_id' => pnVarPrepForStore($item['form_item_id'])
-                                                                  , 'action' => 'heavier'
-                                                                  , 'authid' => pnSecGenAuthKey() 
-                                                                  )
-                                                           )
-                                                 , '<img src="' . _FORMEXPRESSMOVEDOWNICON . '" alt="' . _FORMEXPRESSMOVEDOWN . '"  border="0"/>'
-                                                 );
-                    }
-                }
-
-            }
-
-    $output->SetInputMode(_PNH_PARSEINPUT);
-    // Return the output that has been generated by this function
-      return ( join(' ', $options) );
-      return $options;
-
-}
-
 function FormExpress_admin_shift_item_weight($args) {
-    list ( $form_id
-         , $form_item_id
-         , $action
-         , $authid
-         ) = pnVarCleanFromInput ( 'form_id'
-                                 , 'form_item_id'
-                                 , 'action'
-                                 , 'authid'
-                                 );
+
+    $form_id = FormUtil::getPassedValue('form_id');
+    $form_item_id = FormUtil::getPassedValue('form_item_id');
+    $action = FormUtil::getPassedValue('action');
 
     extract($args);
 
@@ -1046,19 +914,12 @@ function FormExpress_admin_shift_item_weight($args) {
         return true;
     }
 
-    $output = new FXHtml();
-    if (!pnModAPILoad('FormExpress', 'admin')) {
-        $output->Text(_LOADFAILED);
-        return $output->GetOutput();
-    }
-
     if (!FormExpress_adminapi_shift_item_weight( $form_id
                                                , $form_item_id
                                                , $action
                                                )
        ) {
-        $output->Text(pnSessionGetVar('errormsg'));
-        return $output->GetOutput();
+        return pnSessionGetVar('errormsg');
     }
 
     $fxCache = new FXCache();

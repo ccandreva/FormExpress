@@ -26,6 +26,7 @@ class formexpress_admin_modifyformHandler extends pnFormHandler
         	'submit_action'  => "{FormExpress:sendmail&email_address='". pnConfigGetVar('adminmail') ."'}",
         	'success_action' => "{FormExpress:display_message&type='success'&message='Your message has been sent'}",
         	'failure_action' => "{FormExpress:display_message&type='failure'&message='Ooops! Something horrid has happened!'}",
+        	'active' => '1',
 	  );
         }
     	$render->assign($form);

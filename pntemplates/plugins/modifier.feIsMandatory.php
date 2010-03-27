@@ -1,6 +1,6 @@
 <?php
 /**
- * $Id:                                                             $
+ * $Id$
  *
  * Modifier to return 1 only if the input is 1, else 0
  */

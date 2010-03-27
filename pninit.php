@@ -1,5 +1,5 @@
 <?php
-// $Id: pninit.php,v 1.2 2002/06/29 10:38:59 philip Exp $
+// $Id$
 // ----------------------------------------------------------------------
 // FormExpress module for POST-NUKE Content Management System
 // Copyright (C) 2002 by Stutchbury Limited

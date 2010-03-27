@@ -3,7 +3,7 @@
  * FormExpress : Build forms for Zikula through a web interface
  *
  * @copyright (c) 2002 Stutchbury Limited, 2010 Chris Candreva
- * @Version $Id:                                              $
+ * @Version $Id$
  * @license GNU/GPL - http://www.gnu.org/copyleft/gpl.html
  * @package FormExpress
  *

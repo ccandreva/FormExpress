@@ -12,7 +12,6 @@
 
 <!--[ foreach from=$form.items item=item ]-->
 
-
 <!--[ if $item.item_type == 'groupstart' ]-->
   </ul>
   <fieldset>
@@ -24,7 +23,8 @@
   </fieldset>
   <ul class="FEl1">
   <!--[if $ShowEditLinks]--><small><!--[gt text="GroupEnd"]--></small><!--[feEditLink item=$item]--><!--[/if]-->
-<!--[ else ]-->
+
+<!--[ elseif $item.item_type ]-->  <!--[* item_type can't be null ]-->
 
   <!--[if ($item.next_position == 'right') && $InRow == false]-->
     <!--[ assign var=InRow value=true ]-->

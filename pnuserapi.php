@@ -36,6 +36,10 @@
  */
 function FormExpress_userapi_getall($args)
 {
+    // Security check - important to do this as early as possible
+    if (!SecurityUtil::checkPermission ('FormExpress::', '::', ACCESS_ADD)) {
+        return LogUtil::registerPermissionError();
+    }
     // Security check for entire function
     if (!pnSecAuthAction(0, 'FormExpress::', '::', ACCESS_READ)) {
         return array();
@@ -121,9 +125,9 @@ function FormExpress_userapi_items_getall($args)
         $status = $args['status'];
     }
 
-    // Security check for FormExpress itself
-    if (!pnSecAuthAction(0, 'FormExpress::', '::', ACCESS_READ)) {
-        return $items;
+    // Security check - important to do this as early as possible
+    if (!SecurityUtil::checkPermission ('FormExpress::', '::', ACCESS_ADD)) {
+        return LogUtil::registerPermissionError();
     }
 
     $table = pnDBGetTables();

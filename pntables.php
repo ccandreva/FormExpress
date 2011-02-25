@@ -67,7 +67,7 @@ function FormExpress_pntables()
         );
 
 
-    $table['FormExpressItem'] = DBUtil::getLimitedTablename('FormExpressItem');
+    $table['FormExpressItem'] = DBUtil::getLimitedTablename('FormExpressItems');
     $table['FormExpressItem_column'] = array(
         'form_item_id'    => 'fx_form_item_id',
         'form_id'   => 'fx_form_id',

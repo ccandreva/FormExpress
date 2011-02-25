@@ -45,7 +45,8 @@ class formexpress_admin_modifyformHandler extends pnFormHandler
 
       $form_id = pnSessionGetVar('formexpress_modifyform_formid');
       if (empty($form_id)) {
-        $stat = pnModAPIFunc('FormExpress', 'admin', 'create', $formData);
+        $stat = pnModAPIFunc('FormExpress', 'admin', 'create', 
+                array('formData' => $formData) );
       } else {
         pnSessionDelVar('formexpress_modifyform_formid');
         $formData['form_id'] = $form_id;

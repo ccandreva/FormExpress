@@ -34,111 +34,42 @@
 
 /**
  * create a new FormExpress item
- * @param $args['form_name'] name of the item
- * @param $args['number'] number of the item
+ * @param $args['formData'] Object array of form data
  * @returns int
  * @return FormExpress item ID on success, false on failure
  */
 function FormExpress_adminapi_create($args)
 {
-
-    // Get arguments from argument array - all arguments to this function
-    // should be obtained from the $args array, getting them from other
-    // places such as the environment is not allowed, as that makes
-    // assumptions that will not hold in future versions of PostNuke
-    extract($args);
-    // Argument check - make sure that all required arguments are present,
-    // if not then set an appropriate error message and return
-    if ((!isset($form_name)) ||
-        (!isset($submit_action)) ||
-        (!isset($language))
-       ) {
-        pnSessionSetVar('errormsg', _MODARGSERROR);
-        return false;
-    }
-    // Security check - important to do this as early on as possible to 
-    // avoid potential security holes or just too much wasted processing
-    if (!pnSecAuthAction(0, 'FormExpress::Item', "$form_name::", ACCESS_ADD)) {
-        pnSessionSetVar('errormsg', _FORMEXPRESSNOAUTH);
-        return false;
+    // Extract form data object
+    $formData = $args[formData];
+    $form_name = $formData[form_name];
+    // Security check - important to do this as early as possible
+    if (!SecurityUtil::checkPermission ('FormExpress::Item', "::$form_name", ACCESS_ADD)) {
+        return LogUtil::registerPermissionError();
     }
 
-    // Get datbase setup - note that both pnDBGetConn() and pnDBGetTables()
-    // return arrays but we handle them differently.  For pnDBGetConn()
-    // we currently just want the first item, which is the official
-    // database handle.  For pnDBGetTables() we want to keep the entire
-    // tables array together for easy reference later on
-    list($dbconn) = pnDBGetConn();
-    $pntable = pnDBGetTables();
 
-    // It's good practice to name the table and column definitions you
-    // are getting - $table and $column don't cut it in more complex
-    // modules
-    $FormExpresstable = $pntable['FormExpress'];
-    $FormExpresscolumn = &$pntable['FormExpress_column'];
+    $result = DBUtil::insertObject($formData, 'FormExpress', false, 'form_id');
+    if ($formData['form_id']) {
+        // Get the ID of the form that we inserted.
+        $form_id = $formData['form_id'];
 
-    // Get next ID in table - this is required prior to any insert that
-    // uses a unique ID, and ensures that the ID generation is carried
-    // out in a database-portable fashion
-    $nextId = $dbconn->GenId($FormExpresstable);
+        // Let any hooks know that we have created a new item.  As this is a
+        // create hook we're passing 'tid' as the extra info, which is the
+        // argument that all of the other functions use to reference this
+        // item
+        pnModCallHooks('item', 'create', $form_id, 'form_id');
 
-
-    // Add item - the formatting here is not mandatory, but it does make
-    // the SQL statement relatively easy to read.  Also, separating out
-    // the sql statement from the Execute() command allows for simpler
-    // debug operation if it is ever needed
-    $sql = "INSERT INTO $FormExpresstable
-              ( $FormExpresscolumn[form_id]
-              , $FormExpresscolumn[form_name]
-              , $FormExpresscolumn[description]
-              , $FormExpresscolumn[submit_action]
-              , $FormExpresscolumn[success_action]
-              , $FormExpresscolumn[failure_action]
-              , $FormExpresscolumn[onload_action]
-              , $FormExpresscolumn[validation_action]
-              , $FormExpresscolumn[active]
-              , $FormExpresscolumn[language]
-              , $FormExpresscolumn[input_name_suffix]
-              ) VALUES
-              ( $nextId
-              , '" . pnVarPrepForStore($form_name) . "'
-              , '" . pnVarPrepForStore($description) . "'
-              , '" . pnVarPrepForStore($submit_action) . "'
-              , '" . pnVarPrepForStore($success_action) . "'
-              , '" . pnVarPrepForStore($failure_action) . "'
-              , '" . pnVarPrepForStore($onload_action) . "'
-              , '" . pnVarPrepForStore($validation_action) . "'
-              , '" . pnVarPrepForStore($active) . "'
-              , '" . pnVarPrepForStore($language) . "'
-              , '" . time() . "'
-              )";
-    $dbconn->Execute($sql);
-
-    // Check for an error with the database code, and if so set an
-    // appropriate error message and return
-    if ($dbconn->ErrorNo() != 0) {
-        pnSessionSetVar('errormsg', _CREATEFAILED . $sql);
-        return false;
+        // Return the id of the newly created item to the calling process
+        return $form_id;
+    } else {
+        return $result;
     }
-
-    // Get the ID of the item that we inserted.  It is possible, although
-    // very unlikely, that this is different from $nextId as obtained
-    // above, but it is better to be safe than sorry in this situation
-    $form_id = $dbconn->PO_Insert_ID($FormExpresstable, $FormExpresscolumn['form_id']);
-
-    // Let any hooks know that we have created a new item.  As this is a
-    // create hook we're passing 'tid' as the extra info, which is the
-    // argument that all of the other functions use to reference this
-    // item
-    pnModCallHooks('item', 'create', $form_id, 'form_id');
-
-    // Return the id of the newly created item to the calling process
-    return $form_id;
 }
 
 /**
  * delete an FormExpress
- * @param $args['tid'] ID of the item
+ * @param $args['form_id'] ID of the item
  * @returns bool
  * @return true on success, false on failure
  */

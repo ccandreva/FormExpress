@@ -314,7 +314,7 @@ function FormExpress_serialize2form($import_file_name) {
 
 /** *********************************************************************************
  * Need to put some exception handling in here
- */
+ * Actually this is now apparently not used, commenting out until we are sure.
 function FormExpress_loadform($form) {
 
     unset($form['form_id']);
@@ -343,7 +343,7 @@ function FormExpress_loadform($form) {
     }
 
 }
-
+*/
 
 
 //======================= FormExpress Items code ==========================================

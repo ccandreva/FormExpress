@@ -38,6 +38,7 @@ include_once( 'pnclass/FXCache.php' );
  */
 function FormExpress_user_main()
 {
+
     // Security check - important to do this as early as possible to avoid
     // potential security holes or just too much wasted processing.  For the
     // main function we want to check that the user has at least overview
@@ -46,6 +47,7 @@ function FormExpress_user_main()
     // level of access for administration depends on the particular module, but
     // it is generally either 'overview' or 'read'
     if (!pnSecAuthAction(0, 'FormExpress::', '::', ACCESS_READ)) {
+        $dom = ZLanguage::getModuleDomain('FormExpress');
         return __("Not authorised to access FormExpress module");
     }
 
@@ -82,6 +84,7 @@ function FormExpress_user_view()
     $items = pnModAPIFunc( 'FormExpress', 'user', 'getall' );
 
     if ($items == false) {
+        $dom = ZLanguage::getModuleDomain('FormExpress');
         return LogUtil::registerError( __("No forms found."), 500) ;
     }
 
@@ -284,6 +287,9 @@ function FormExpress_user_submit_form() {
  *                   
  */
 function FormExpress_parseandexecute($action, $fx_value='', $check_config=true) {
+
+     $dom = ZLanguage::getModuleDomain('FormExpress');
+
     //First check if there are '{}' at each end
     //if ( !ereg("(^[[:space:]]*[\{]+).+([\}]+[[:space:]]*$)", $action ) ) {
     // Check if action starts with '{'

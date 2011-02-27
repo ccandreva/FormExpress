@@ -49,8 +49,9 @@ class formexpress_admin_modifyformHandler extends pnFormHandler
                 array('formData' => $formData) );
       } else {
         pnSessionDelVar('formexpress_modifyform_formid');
-        $formData['form_id'] = $form_id;
-        $stat = pnModAPIFunc('FormExpress', 'admin', 'update', $formData);
+        $formData[form_id] = $form_id;
+        $stat = pnModAPIFunc('FormExpress', 'admin', 'update',
+                array('formData' => $formData) );
       }
 
       if ($stat == false) {

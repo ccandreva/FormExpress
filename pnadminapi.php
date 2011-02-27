@@ -55,7 +55,7 @@ function FormExpress_adminapi_create($args)
         $form_id = $formData['form_id'];
 
         // Let any hooks know that we have created a new item.  As this is a
-        // create hook we're passing 'tid' as the extra info, which is the
+        // create hook we're passing 'form_id' as the extra info, which is the
         // argument that all of the other functions use to reference this
         // item
         pnModCallHooks('item', 'create', $form_id, 'form_id');
@@ -75,96 +75,33 @@ function FormExpress_adminapi_create($args)
  */
 function FormExpress_adminapi_delete($args)
 {
-    // Get arguments from argument array - all arguments to this function
-    // should be obtained from the $args array, getting them from other
-    // places such as the environment is not allowed, as that makes
-    // assumptions that will not hold in future versions of PostNuke
-    extract($args);
 
-    // Argument check - make sure that all required arguments are present,
-    // if not then set an appropriate error message and return
-    if (!isset($form_id)) {
+    // Make sure we received a form _id
+    if (isset($args['form_id'])) {
+        $form_id = $args['form_id'];
+    } else {
         pnSessionSetVar('errormsg', _MODARGSERROR);
         return false;
     }
 
-    // Load API.  Note that this is loading the user API in addition to
-    // the administration API, that is because the user API contains
-    // the function to obtain item information which is the first thing
-    // that we need to do.  If the API fails to load an appropriate error
-    // message is posted and the function returns
-    if (!pnModAPILoad('FormExpress', 'user')) {
-        pnSessionSetVar('errormsg', _LOADFAILED);
-        return false;
-    }
-
-    // The user API function is called.  This takes the item ID which
-    // we obtained from the input and gets us the information on the
-    // appropriate item.  If the item does not exist we post an appropriate
-    // message and return
-    $item = pnModAPIFunc('FormExpress',
-            'user',
-            'get',
-            array('form_id' => $form_id));
+    // Load the form, we need the name for the permissoins check
+    $item = pnModAPIFunc('FormExpress', 'user', 'get',
+            array('form_id' => $form_id)
+            );
 
     if ($item == false) {
         pnSessionSetVar('errormsg', _FORMEXPRESSNOSUCHITEM);
         return false;
     }
 
-    // Security check - important to do this as early on as possible to 
-    // avoid potential security holes or just too much wasted processing.
-    // However, in this case we had to wait until we could obtain the item
-    // name to complete the instance information so this is the first
-    // chance we get to do the check
-    if (!pnSecAuthAction(0, 'FormExpress::Item', "$item[form_name]::$form_id", ACCESS_DELETE)) {
-        pnSessionSetVar('errormsg', _FORMEXPRESSNOAUTH);
-        return false;
+
+    // Security check for delete access on this form
+    if (!SecurityUtil::checkPermission('FormExpresss::', "$item[form_name]::$form_id", ACCESS_DELETE)) {
+        return LogUtil::registerPermissionError();
     }
 
-    // Get datbase setup - note that both pnDBGetConn() and pnDBGetTables()
-    // return arrays but we handle them differently.  For pnDBGetConn()
-    // we currently just want the first item, which is the official
-    // database handle.  For pnDBGetTables() we want to keep the entire
-    // tables array together for easy reference later on
-    list($dbconn) = pnDBGetConn();
-    $pntable = pnDBGetTables();
-
-    // It's good practice to name the table and column definitions you
-    // are getting - $table and $column don't cut it in more complex
-    // modules
-    $FormExpresstable = $pntable['FormExpress'];
-    $FormExpresscolumn = &$pntable['FormExpress_column'];
-
-    // Delete the item - the formatting here is not mandatory, but it does
-    // make the SQL statement relatively easy to read.  Also, separating
-    // out the sql statement from the Execute() command allows for simpler
-    // debug operation if it is ever needed
-    $sql = "DELETE FROM $FormExpresstable
-            WHERE $FormExpresscolumn[form_id] = " . pnVarPrepForStore($form_id);
-    $dbconn->Execute($sql);
-
-    // Check for an error with the database code, and if so set an
-    // appropriate error message and return
-    if ($dbconn->ErrorNo() != 0) {
-        pnSessionSetVar('errormsg', _DELETEFAILED);
-        return false;
-    }
-
-    $FormExpressItemtable = $pntable['FormExpressItem'];
-    $FormExpressItemcolumn = &$pntable['FormExpressItem_column'];
-
-
-    $sql = "DELETE FROM $FormExpressItemtable
-            WHERE $FormExpressItemcolumn[form_id] = " . pnVarPrepForStore($form_id);
-    $dbconn->Execute($sql);
-
-    // Check for an error with the database code, and if so set an
-    // appropriate error message and return
-    if ($dbconn->ErrorNo() != 0) {
-        pnSessionSetVar('errormsg', _DELETEFAILED);
-        return false;
-    }
+    DBUtil::deleteObjectById ('FormExpressItem', $form_id, 'form_id');
+    DBUtil::deleteObjectById ('FormExpress', $form_id, 'form_id');
 
     // Let any hooks know that we have deleted an item.  As this is a
     // delete hook we're not passing any extra info
@@ -175,49 +112,25 @@ function FormExpress_adminapi_delete($args)
 }
 
 /**
- * update a FormExpress item
- * @param $args['tid'] the ID of the item
+ * update a FormExpress Form
+ * @param $args['form_id'] the ID of the item
  * @param $args['form_name'] the new name of the item
  * @param $args['number'] the new number of the item
  */
 function FormExpress_adminapi_update($args)
 {
-    // Get arguments from argument array - all arguments to this function
-    // should be obtained from the $args array, getting them from other
-    // places such as the environment is not allowed, as that makes
-    // assumptions that will not hold in future versions of PostNuke
-    extract($args);
-
-    // Argument check - make sure that all required arguments are present,
-    // if not then set an appropriate error message and return
-    if ((!isset($form_id)) ||
-        (!isset($form_name)) ||
-        (!isset($submit_action)) ||
-        (!isset($language))
-       ) {
-        pnSessionSetVar('errormsg', _MODARGSERROR);
-        return false;
+    // Extract form data object
+    $formData = $args[formData];
+    $form_name = $formData[form_name];
+    $form_id = $formData[form_id];
+    // Security check - important to do this as early as possible
+    if (!SecurityUtil::checkPermission ('FormExpress::Item', "::$form_name", ACCESS_ADD)) {
+        return LogUtil::registerPermissionError();
     }
+    if( empty($formData[active])) { $formData[active] = 0; }
 
-     if( empty($active)) { $active = 0; }
-
-    // Load API.  Note that this is loading the user API in addition to
-    // the administration API, that is because the user API contains
-    // the function to obtain item information which is the first thing
-    // that we need to do.  If the API fails to load an appropriate error
-    // message is posted and the function returns
-    if (!pnModAPILoad('FormExpress', 'user')) {
-        pnSessionSetVar('errormsg', _LOADFAILED);
-        return false;
-    }
-
-    // The user API function is called.  This takes the item ID which
-    // we obtained from the input and gets us the information on the
-    // appropriate item.  If the item does not exist we post an appropriate
-    // message and return
-    $item = pnModAPIFunc('FormExpress',
-            'user',
-            'get',
+    // Load old data, we will need the current name for the security check
+    $item = pnModAPIFunc('FormExpress', 'user', 'get',
             array('form_id' => $form_id));
 
     if ($item == false) {
@@ -225,65 +138,21 @@ function FormExpress_adminapi_update($args)
         return false;
     }
 
-    // Security check - important to do this as early on as possible to 
-    // avoid potential security holes or just too much wasted processing.
-    // However, in this case we had to wait until we could obtain the item
-    // name to complete the instance information so this is the first
-    // chance we get to do the check
-
-    // Note that at this stage we have two sets of item information, the
-    // pre-modification and the post-modification.  We need to check against
-    // both of these to ensure that whoever is doing the modification has
-    // suitable permissions to edit the item otherwise people can potentially
-    // edit areas to which they do not have suitable access
+    // Security check against form name
     if (!pnSecAuthAction(0, 'FormExpress::Item', "$item[form_name]::$form_id", ACCESS_EDIT)) {
         pnSessionSetVar('errormsg', _FORMEXPRESSNOAUTH);
         return false;
     }
-    if (!pnSecAuthAction(0, 'FormExpress::Item', "$form_name::$form_id", ACCESS_EDIT)) {
-        pnSessionSetVar('errormsg', _FORMEXPRESSNOAUTH);
-        return false;
+    // If the name has changed, check against the new name too
+    if ( $item[form_name] != $form_name) {
+        if (!pnSecAuthAction(0, 'FormExpress::Item', "$form_name::$form_id", ACCESS_EDIT)) {
+            pnSessionSetVar('errormsg', _FORMEXPRESSNOAUTH);
+            return false;
+        }
     }
 
-    // Get datbase setup - note that both pnDBGetConn() and pnDBGetTables()
-    // return arrays but we handle them differently.  For pnDBGetConn()
-    // we currently just want the first item, which is the official
-    // database handle.  For pnDBGetTables() we want to keep the entire
-    // tables array together for easy reference later on
-    list($dbconn) = pnDBGetConn();
-    $pntable = pnDBGetTables();
-
-    // It's good practice to name the table and column definitions you
-    // are getting - $table and $column don't cut it in more complex
-    // modules
-    $FormExpresstable = $pntable['FormExpress'];
-    $FormExpresscolumn = &$pntable['FormExpress_column'];
-
-    // Update the item - the formatting here is not mandatory, but it does
-    // make the SQL statement relatively easy to read.  Also, separating
-    // out the sql statement from the Execute() command allows for simpler
-    // debug operation if it is ever needed
-    $sql = "UPDATE $FormExpresstable
-            SET $FormExpresscolumn[form_name] = '" . pnVarPrepForStore($form_name) . "'
-              , $FormExpresscolumn[description] = '" . pnVarPrepForStore($description) . "'
-              , $FormExpresscolumn[submit_action] = '" . pnVarPrepForStore($submit_action) . "'
-              , $FormExpresscolumn[success_action] = '" . pnVarPrepForStore($success_action) . "'
-              , $FormExpresscolumn[failure_action] = '" . pnVarPrepForStore($failure_action) . "'
-              , $FormExpresscolumn[onload_action] = '" . pnVarPrepForStore($onload_action) . "'
-              , $FormExpresscolumn[validation_action] = '" . pnVarPrepForStore($validation_action) . "'
-              , $FormExpresscolumn[active] = " . pnVarPrepForStore($active) . "
-              , $FormExpresscolumn[language] = '" . pnVarPrepForStore($language) . "'
-            WHERE $FormExpresscolumn[form_id] = " . pnVarPrepForStore($form_id);
-    $dbconn->Execute($sql);
-    // Check for an error with the database code, and if so set an
-    // appropriate error message and return
-    if ($dbconn->ErrorNo() != 0) {
-        pnSessionSetVar('errormsg', _UPDATEFAILED.'here'.$sql);
-        return false;
-    }
-
-    // Let the calling process know that we have finished successfully
-    return true;
+    $stat = DBUtil::updateObject($formData, 'FormExpress', '', 'form_id');
+    return $stat;
 }
 
 //***************** ITEMS **********************

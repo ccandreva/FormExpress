@@ -46,9 +46,8 @@ function FormExpress_user_main()
     // able to see anything and so we refuse access altogether.  The lowest
     // level of access for administration depends on the particular module, but
     // it is generally either 'overview' or 'read'
-    if (!pnSecAuthAction(0, 'FormExpress::', '::', ACCESS_READ)) {
-        $dom = ZLanguage::getModuleDomain('FormExpress');
-        return __("Not authorised to access FormExpress module");
+    if (!SecurityUtil::checkPermission('FormExpresss::', '::', ACCESS_READ)) {
+        return LogUtil::registerPermissionError();
     }
 
     $default_form_id = pnModGetVar('FormExpress', 'default_form_id');

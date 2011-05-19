@@ -266,7 +266,7 @@ class formexpress_admin_item_modifyHandler extends pnFormHandler
         /* Get item array from the pnRender/Smarty object */
 //        $form_item = $render->get_template_vars('form_item');
 
-        // Parameters should only be set when the firm is intiailly called
+        // Parameters should only be set when the form is intiailly called
         if (is_array($this->params)) {
             $func = $this->params['func'];
 
@@ -315,7 +315,7 @@ class formexpress_admin_item_modifyHandler extends pnFormHandler
         $prompt_positionItems = array (
             array( 'value' => 'above', 'text' => __('Above', $dom) ),
             array( 'value' => 'below', 'text' => __('Below', $dom) ),
-            array( 'value' => 'letcol', 'text' => __('Left Column', $dom) ),
+            array( 'value' => 'leftcol', 'text' => __('Left Column', $dom) ),
             array( 'value' => 'left', 'text' => __('Left', $dom) ),
             array( 'value' => 'right', 'text' => __('Right', $dom) ),
             array( 'value' => 'hidden', 'text' => __('Hidden', $dom) ),
@@ -344,10 +344,12 @@ class formexpress_admin_item_modifyHandler extends pnFormHandler
       SessionUtil::delVar('formexpress_item_modify');
 
       if ($formData['func'] == 'new' ) {
-        $stat = pnModAPIFunc( 'FormExpress', 'admin', 'item_create', $formData);
+        $func = 'item_create';
       } else {
-        $stat = pnModAPIFunc( 'FormExpress', 'admin', 'item_update', $formData);
+        $func = 'item_update';
       }
+        $stat = pnModAPIFunc('FormExpress', 'admin', $func,
+                array('itemObj' => $formData) );
       if ($stat == false) {
         $render->assign('errormsg', __('An error occurred saving the form: ') . $form_id . ' ' . pnSessionGetVar('errormsg') ); 
 	return false;

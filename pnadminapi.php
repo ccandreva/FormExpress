@@ -34,27 +34,26 @@
 
 /**
  * create a new FormExpress item
- * @param $args['formData'] Object array of form data
+ * @param $args['formObj'] Object array of form data
  * @returns int
  * @return FormExpress item ID on success, false on failure
  */
 function FormExpress_adminapi_create($args)
 {
     // Extract form data object
-    $formData = $args[formData];
-    $form_name = $formData[form_name];
+    $formObj = $args[formObj];
+    $form_name = $formObj[form_name];
     // Security check - important to do this as early as possible
     if (!SecurityUtil::checkPermission ('FormExpress::Item', "::$form_name", ACCESS_ADD)) {
         return LogUtil::registerPermissionError();
     }
 
-
-    $result = DBUtil::insertObject($formData, 'FormExpress', false, 'form_id');
-    if ($formData['form_id']) {
+    $result = DBUtil::insertObject($formObj, 'FormExpress', 'form_id');
+    if ($formObj['form_id']) {
         // Get the ID of the form that we inserted.
-        $form_id = $formData['form_id'];
+        $form_id = $formObj['form_id'];
 
-        // Let any hooks know that we have created a new item.  As this is a
+        // Let any hooks know that we have created a new form.  As this is a
         // create hook we're passing 'form_id' as the extra info, which is the
         // argument that all of the other functions use to reference this
         // item
@@ -120,14 +119,14 @@ function FormExpress_adminapi_delete($args)
 function FormExpress_adminapi_update($args)
 {
     // Extract form data object
-    $formData = $args[formData];
-    $form_name = $formData[form_name];
-    $form_id = $formData[form_id];
+    $formObj = $args[formObj];
+    $form_name = $formObj[form_name];
+    $form_id = $formObj[form_id];
     // Security check - important to do this as early as possible
     if (!SecurityUtil::checkPermission ('FormExpress::Item', "::$form_name", ACCESS_ADD)) {
         return LogUtil::registerPermissionError();
     }
-    if( empty($formData[active])) { $formData[active] = 0; }
+    if( empty($formObj[active])) { $formObj[active] = 0; }
 
     // Load old data, we will need the current name for the security check
     $item = pnModAPIFunc('FormExpress', 'user', 'get',
@@ -151,118 +150,39 @@ function FormExpress_adminapi_update($args)
         }
     }
 
-    $stat = DBUtil::updateObject($formData, 'FormExpress', '', 'form_id');
+    $stat = DBUtil::updateObject($formObj, 'FormExpress', '', 'form_id');
     return $stat;
 }
 
 //***************** ITEMS **********************
 /**
  * create a new FormExpress item
- * @param $args['item_name'] name of the item
- * @param $args['number'] number of the item
+ * @param $args['itemObj'] The item to add
  * @returns int
  * @return FormExpress item ID on success, false on failure
  */
 function FormExpress_adminapi_item_create($args)
 {
 
-    // Get arguments from argument array - all arguments to this function
-    // should be obtained from the $args array, getting them from other
-    // places such as the environment is not allowed, as that makes
-    // assumptions that will not hold in future versions of PostNuke
-    extract($args);
-    // Argument check - make sure that all required arguments are present,
-    // if not then set an appropriate error message and return
-    if (  (!isset($form_id))
-       || (!isset($item_type))
-       ) {
-        pnSessionSetVar('errormsg', _MODARGSERROR . "'$form_id' '$item_type'");
-        return false;
-    }
+    $itemObj = $args[itemObj];
 
-    // Security check - important to do this as early on as possible to
+    // See if we have permission to add an item
     // avoid potential security holes or just too much wasted processing
-    if (!pnSecAuthAction(0, 'FormExpress::Item', "$item_name::", ACCESS_ADD)) {
-        pnSessionSetVar('errormsg', _FORMEXPRESSNOAUTH);
-        return false;
+    if (!SecurityUtil::checkPermission ('FormExpress::Item', "$item_name::", ACCESS_ADD)) {
+        return LogUtil::registerPermissionError();
     }
 
-    // Get datbase setup - note that both pnDBGetConn() and pnDBGetTables()
-    // return arrays but we handle them differently.  For pnDBGetConn()
-    // we currently just want the first item, which is the official
-    // database handle.  For pnDBGetTables() we want to keep the entire
-    // tables array together for easy reference later on
-    list($dbconn) = pnDBGetConn();
-    $pntable = pnDBGetTables();
-
-    // It's good practice to name the table and column definitions you
-    // are getting - $table and $column don't cut it in more complex
-    // modules
-    $FormExpressItemtable = $pntable['FormExpressItem'];
-    $FormExpressItemcolumn = &$pntable['FormExpressItem_column'];
-
-    // Get next ID in table - this is required prior to any insert that
-    // uses a unique ID, and ensures that the ID generation is carried
-    // out in a database-portable fashion
-    $nextId = $dbconn->GenId($FormExpressItemtable);
-//Get the weight
-    $new_sequence = FormExpress_adminapi_new_weight
-                        ( array ('table' => $FormExpressItemtable
+    //Get the weight
+    $itemObj[sequence] = FormExpress_adminapi_new_weight
+                        ( array ('table' => 'FormExpressItem'
                                 ,'weight_column' => $FormExpressItemcolumn['sequence']
                                 , 'additional_where_clause' => $FormExpressItemcolumn['form_id'].' = '. pnVarPrepForStore($form_id)
                                 )
                         );
+    $result = DBUtil::insertObject($itemObj, 'FormExpressItem', false, 'form_item_id');
 
-    // Add item - the formatting here is not mandatory, but it does make
-    // the SQL statement relatively easy to read.  Also, separating out
-    // the sql statement from the Execute() command allows for simpler
-    // debug operation if it is ever needed
-              //, '" . pnVarPrepForStore($sequence) . "'
-    $sql = "INSERT INTO $FormExpressItemtable
-              ( $FormExpressItemcolumn[form_item_id]
-              , $FormExpressItemcolumn[form_id]
-              , $FormExpressItemcolumn[sequence]
-              , $FormExpressItemcolumn[item_type]
-              , $FormExpressItemcolumn[item_name]
-              , $FormExpressItemcolumn[required]
-              , $FormExpressItemcolumn[prompt]
-              , $FormExpressItemcolumn[prompt_position]
-              , $FormExpressItemcolumn[item_value]
-              , $FormExpressItemcolumn[default_value]
-              , $FormExpressItemcolumn[cols]
-              , $FormExpressItemcolumn[rows]
-              , $FormExpressItemcolumn[max_length]
-              , $FormExpressItemcolumn[item_attributes]
-              , $FormExpressItemcolumn[validation_rule]
-              , $FormExpressItemcolumn[multiple]
-              , $FormExpressItemcolumn[relative_position]
-              , $FormExpressItemcolumn[active]
-              ) VALUES
-              ( $nextId
-              , '" . pnVarPrepForStore($form_id) . "'
-              , '" . pnVarPrepForStore($new_sequence) . "'
-              , '" . pnVarPrepForStore($item_type) . "'
-              , '" . pnVarPrepForStore($item_name) . "'
-              , '" . pnVarPrepForStore($required) . "'
-              , '" . pnVarPrepForStore($prompt) . "'
-              , '" . pnVarPrepForStore($prompt_position) . "'
-              , '" . pnVarPrepForStore($item_value) . "'
-              , '" . pnVarPrepForStore($default_value) . "'
-              , '" . pnVarPrepForStore($cols) . "'
-              , '" . pnVarPrepForStore($rows) . "'
-              , '" . pnVarPrepForStore($max_length) . "'
-              , '" . pnVarPrepForStore($item_attributes) . "'
-              , '" . pnVarPrepForStore($validation_rule) . "'
-              , '" . pnVarPrepForStore($multiple) . "'
-              , '" . pnVarPrepForStore($relative_position) . "'
-              , '" . pnVarPrepForStore($active) . "'
-              )";
-    $dbconn->Execute($sql);
-
-    // Check for an error with the database code, and if so set an
-    // appropriate error message and return
-    if ($dbconn->ErrorNo() != 0) {
-        pnSessionSetVar('errormsg', _CREATEFAILED . $sql);
+    if (!$result) {
+        pnSessionSetVar('errormsg', _CREATEFAILED );
         return false;
     }
 
@@ -283,13 +203,11 @@ function FormExpress_adminapi_item_create($args)
             $required_sequence = $shift_weight_range['min'];
         }
         while ( $new_sequence > $required_sequence ) {
-            $new_sequence = FormExpress_adminapi_shift_item_weight( $form_id
-                                                                  , $form_item_id
-                                                                  , 'lighter'
-                                                                  );
+            $new_sequence = FormExpress_adminapi_shift_item_weight(
+                    array('form_id' => $form_id, 'form_item_id' => $form_item_id,'action' => 'lighter')
+            );
         }
     }
-
     // Let any hooks know that we have created a new item.  As this is a
     // create hook we're passing 'tid' as the extra info, which is the
     // argument that all of the other functions use to reference this
@@ -309,42 +227,24 @@ function FormExpress_adminapi_item_create($args)
  */
 function FormExpress_adminapi_item_update($args)
 {
-    // Get arguments from argument array - all arguments to this function
-    // should be obtained from the $args array, getting them from other
-    // places such as the environment is not allowed, as that makes
-    // assumptions that will not hold in future versions of PostNuke
-    extract($args);
+    // Get arguments from argument array - all arguments to
+    $itemObj = $args['itemObj'];
+    $form_item_id = $itemObj['form_item_id'];
 
-    // Argument check - make sure that all required arguments are present,
-    // if not then set an appropriate error message and return
-    if ((!isset($form_item_id)) ||
-        (!isset($form_id)) ||
-        (!isset($item_type)) ||
-        (!isset($item_name))
-       ) {
-        pnSessionSetVar('errormsg', _MODARGSERROR . ' (admin api item update)');
-        return false;
+    // See if we have permission to add an item
+    // avoid potential security holes or just too much wasted processing
+    if (!SecurityUtil::checkPermission ('FormExpress::Item', "$item_name::", ACCESS_ADD)) {
+        return LogUtil::registerPermissionError();
     }
 
-    if( empty($active)) { $active = 0; }
 
-    // Load API.  Note that this is loading the user API in addition to
-    // the administration API, that is because the user API contains
-    // the function to obtain item information which is the first thing
-    // that we need to do.  If the API fails to load an appropriate error
-    // message is posted and the function returns
-    if (!pnModAPILoad('FormExpress', 'user')) {
-        pnSessionSetVar('errormsg', _LOADFAILED);
-        return false;
-    }
+    if( empty($itemObj[active])) { $itemObj[active] = 0; }
 
     // The user API function is called.  This takes the item ID which
     // we obtained from the input and gets us the information on the
     // appropriate item.  If the item does not exist we post an appropriate
     // message and return
-    $item = pnModAPIFunc('FormExpress',
-            'admin',
-            'item_get',
+    $item = pnModAPIFunc('FormExpress', 'admin', 'item_get',
             array('form_item_id' => $form_item_id));
 
     if ($item == false) {
@@ -353,16 +253,6 @@ function FormExpress_adminapi_item_update($args)
     }
 
     // Security check - important to do this as early on as possible to 
-    // avoid potential security holes or just too much wasted processing.
-    // However, in this case we had to wait until we could obtain the item
-    // name to complete the instance information so this is the first
-    // chance we get to do the check
-
-    // Note that at this stage we have two sets of item information, the
-    // pre-modification and the post-modification.  We need to check against
-    // both of these to ensure that whoever is doing the modification has
-    // suitable permissions to edit the item otherwise people can potentially
-    // edit areas to which they do not have suitable access
     if (!pnSecAuthAction(0, 'FormExpress::Item', "$item[item_name]::$form_id", ACCESS_EDIT)) {
         pnSessionSetVar('errormsg', _FORMEXPRESSNOAUTH);
         return false;
@@ -372,69 +262,9 @@ function FormExpress_adminapi_item_update($args)
         return false;
     }
 
-    // Get datbase setup - note that both pnDBGetConn() and pnDBGetTables()
-    // return arrays but we handle them differently.  For pnDBGetConn()
-    // we currently just want the first item, which is the official
-    // database handle.  For pnDBGetTables() we want to keep the entire
-    // tables array together for easy reference later on
-    list($dbconn) = pnDBGetConn();
-    $pntable = pnDBGetTables();
+    $stat = DBUtil::updateObject($itemObj, 'FormExpressItem', '', 'form_item_id');
+    return $stat;
 
-    // It's good practice to name the table and column definitions you
-    // are getting - $table and $column don't cut it in more complex
-    // modules
-    $FormExpressItemtable = $pntable['FormExpressItem'];
-    $FormExpressItemcolumn = &$pntable['FormExpressItem_column'];
-
-    // Update the item - the formatting here is not mandatory, but it does
-    // make the SQL statement relatively easy to read.  Also, separating
-    // out the sql statement from the Execute() command allows for simpler
-    // debug operation if it is ever needed
-    $sql = "UPDATE $FormExpressItemtable
-               SET $FormExpressItemcolumn[sequence] = '"
-                   . pnVarPrepForStore($sequence) . "'
-                 , $FormExpressItemcolumn[item_type] = '"
-                   . pnVarPrepForStore($item_type) . "'
-                 , $FormExpressItemcolumn[item_name] = '"
-                   . pnVarPrepForStore($item_name) . "'
-                 , $FormExpressItemcolumn[required] = '"
-                   . pnVarPrepForStore($required) . "'
-                 , $FormExpressItemcolumn[prompt] = '"
-                   . pnVarPrepForStore($prompt) . "'
-                 , $FormExpressItemcolumn[prompt_position] = '"
-                   . pnVarPrepForStore($prompt_position) . "'
-                 , $FormExpressItemcolumn[item_value] = '"
-                   . pnVarPrepForStore($item_value) . "'
-                 , $FormExpressItemcolumn[default_value] = '"
-                   . pnVarPrepForStore($default_value) . "'
-                 , $FormExpressItemcolumn[cols] = '"
-                   . pnVarPrepForStore($cols) . "'
-                 , $FormExpressItemcolumn[rows] = '"
-                   . pnVarPrepForStore($rows) . "'
-                 , $FormExpressItemcolumn[max_length] = '"
-                   . pnVarPrepForStore($max_length) . "'
-                 , $FormExpressItemcolumn[item_attributes] = '"
-                   . pnVarPrepForStore($item_attributes) . "'
-                 , $FormExpressItemcolumn[validation_rule] = '"
-                   . pnVarPrepForStore($validation_rule) . "'
-                 , $FormExpressItemcolumn[multiple] = '"
-                   . pnVarPrepForStore($multiple) . "'
-                 , $FormExpressItemcolumn[relative_position] = '"
-                   . pnVarPrepForStore($relative_position) . "'
-                 , $FormExpressItemcolumn[active] = '"
-                   . pnVarPrepForStore($active) . "'
-            WHERE $FormExpressItemcolumn[form_item_id] = "
-                   . pnVarPrepForStore($form_item_id);
-    $dbconn->Execute($sql);
-    // Check for an error with the database code, and if so set an
-    // appropriate error message and return
-    if ($dbconn->ErrorNo() != 0) {
-        pnSessionSetVar('errormsg', _UPDATEFAILED);
-        return false;
-    }
-
-    // Let the calling process know that we have finished successfully
-    return true;
 }
 
 /**
@@ -628,10 +458,12 @@ function FormExpress_adminapi_get_item_weight_range( $form_id
 /**
  * FormExpress (items) specific wrapper 
  */
-function FormExpress_adminapi_shift_item_weight( $form_id
-                                               , $form_item_id
-                                               , $action
-                                               ) {
+function FormExpress_adminapi_shift_item_weight( $args ) {
+
+    $form_id = $args['form_id'];
+    $form_item_id = $args['form_item_id'];
+    $action = $args['action'];
+
     $pntable = pnDBGetTables();
     $FormExpressItemtable = $pntable['FormExpressItem'];
     $FormExpressItemcolumn = &$pntable['FormExpressItem_column'];

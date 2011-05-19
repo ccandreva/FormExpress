@@ -77,7 +77,7 @@ function FormExpress_userapi_get($args)
         return false;
     }
 
-    $table = pnDBGetTables();
+    // $table = pnDBGetTables();
     // Security check for each item
     $permFilter = array('component_left'   => 'FormExpress',
                         'component_middle' => '',

@@ -635,13 +635,14 @@ function FormExpress_admin_item_modify($args)
     $render = FormUtil::newpnForm('FormExpress');
     $formobj = new formexpress_admin_item_modifyHandler();
 
+    $form_id = FormUtil::getPassedValue('form_id');
     $form_item_id = FormUtil::getPassedValue('form_item_id');
 
     // Admin functions of this type can be called by other modules. 
     extract($args);
 
     if ($form_item_id) {
-        $formobj->setParams( array('form_item_id' => $form_item_id, 'func' => 'modify') );
+        $formobj->setParams( array('form_id' => $form_id, 'form_item_id' => $form_item_id, 'func' => 'modify') );
     }
 
     return $render->pnFormExecute('formexpress_admin_item_modify.html', $formobj);
@@ -914,11 +915,9 @@ function FormExpress_admin_shift_item_weight($args) {
         return true;
     }
 
-    if (!FormExpress_adminapi_shift_item_weight( $form_id
-                                               , $form_item_id
-                                               , $action
-                                               )
-       ) {
+    if (!pnModAPIFUnc('FormExpress','admin', 'shift_item_weight',
+            array( 'form_id' => $form_id, 'form_item_id' => $form_item_id, 'action' => $action )
+        ) ) {
         return pnSessionGetVar('errormsg');
     }
 

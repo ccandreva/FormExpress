@@ -1,3 +1,13 @@
+/**
+ * FormExpress : Build forms for Zikula through a web interface
+ *
+ * @copyright (c) 2010 Chris Candreva
+ * @Version $Id: style.css 48 2011-05-19 18:11:11Z ccandreva $
+ * @license GNU/GPL - http://www.gnu.org/copyleft/gpl.html
+ * @package FormExpress
+*/
+
+
 table#feViewForms
 {
 	width: 100%;
@@ -41,7 +51,7 @@ form.FormExpress ul.FEl1> li  form.FormExpress ul.FEl1 ul.FEl2 li
 form.FormExpress > ul.FEl1 > li,
 form.FormExpress > fieldset > ul.FEl1 > li
 {
-	clear: left;
+/*	clear: left; */
 }
 
 

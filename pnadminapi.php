@@ -288,23 +288,8 @@ function FormExpress_adminapi_item_delete($args)
         return false;
     }
 
-    // Load API.  Note that this is loading the user API in addition to
-    // the administration API, that is because the user API contains
-    // the function to obtain item information which is the first thing
-    // that we need to do.  If the API fails to load an appropriate error
-    // message is posted and the function returns
-    if (!pnModAPILoad('FormExpress', 'user')) {
-        pnSessionSetVar('errormsg', _LOADFAILED);
-        return false;
-    }
-
-    // The user API function is called.  This takes the item ID which
-    // we obtained from the input and gets us the information on the
-    // appropriate item.  If the item does not exist we post an appropriate
-    // message and return
-    $item = pnModAPIFunc('FormExpress',
-            'admin',
-            'item_get',
+    // Load form for security check against name
+    $item = pnModAPIFunc('FormExpress', 'admin', 'item_get',
             array('form_item_id' => $form_item_id));
 
     if ($item == false) {
@@ -313,43 +298,13 @@ function FormExpress_adminapi_item_delete($args)
     }
 
     // Security check - important to do this as early on as possible to 
-    // avoid potential security holes or just too much wasted processing.
-    // However, in this case we had to wait until we could obtain the item
-    // name to complete the instance information so this is the first
-    // chance we get to do the check
     if (!pnSecAuthAction(0, 'FormExpress::Item', "$item[item_name]::$form_id", ACCESS_DELETE)) {
         pnSessionSetVar('errormsg', _FORMEXPRESSNOAUTH);
         return false;
     }
 
-    // Get datbase setup - note that both pnDBGetConn() and pnDBGetTables()
-    // return arrays but we handle them differently.  For pnDBGetConn()
-    // we currently just want the first item, which is the official
-    // database handle.  For pnDBGetTables() we want to keep the entire
-    // tables array together for easy reference later on
-    list($dbconn) = pnDBGetConn();
-    $pntable = pnDBGetTables();
-
-    // It's good practice to name the table and column definitions you
-    // are getting - $table and $column don't cut it in more complex
-    // modules
-    $FormExpressItemtable = $pntable['FormExpressItem'];
-    $FormExpressItemcolumn = &$pntable['FormExpressItem_column'];
-
-    // Delete the item - the formatting here is not mandatory, but it does
-    // make the SQL statement relatively easy to read.  Also, separating
-    // out the sql statement from the Execute() command allows for simpler
-    // debug operation if it is ever needed
-    $sql = "DELETE FROM $FormExpressItemtable
-            WHERE $FormExpressItemcolumn[form_item_id] = " . pnVarPrepForStore($form_item_id);
-    $dbconn->Execute($sql);
-
-    // Check for an error with the database code, and if so set an
-    // appropriate error message and return
-    if ($dbconn->ErrorNo() != 0) {
-        pnSessionSetVar('errormsg', _DELETEFAILED);
-        return false;
-    }
+    // Delete item via DBUtil
+    DBUtil::deleteObjectById ('FormExpressItem', $form_item_id, 'form_item_id');
 
     // Let any hooks know that we have deleted an item.  As this is a
     // delete hook we're not passing any extra info

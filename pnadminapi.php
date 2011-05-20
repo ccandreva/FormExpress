@@ -316,49 +316,28 @@ function FormExpress_adminapi_item_delete($args)
 
 
 
-/* Stub to put old call into API namespace */
+/* Get list of all radio button groups for given form */
 function FormExpress_adminapi_get_radio_input_list( $args )
 {
   $form_id = $args['id'];
-  return FormExpress_get_radio_input_list($form_id);
-}
 
-
-function FormExpress_get_radio_input_list( $form_id
-                                         ) {
     if ( (empty($form_id))
        ) {
         pnSessionSetVar('errormsg', _MODARGSERROR);
         return false;
     }
 
-    list($dbconn) = pnDBGetConn();
-    $pntable = pnDBGetTables();
+    $table = pnDBGetTables();
+    $FormExpressItemtable = $table['FormExpressItem'];
+    $FormExpressItemcolumn = &$table['FormExpressItem_column'];
 
-    // It's good practice to name the table and column definitions you
-    // are getting - $table and $column don't cut it in more complex
-    // modules
-    $FormExpressItemtable = $pntable['FormExpressItem'];
-    $FormExpressItemcolumn = &$pntable['FormExpressItem_column'];
-    $sql = "SELECT distinct $FormExpressItemcolumn[item_name] "
-          ."  FROM $FormExpressItemtable "
-          ." WHERE $FormExpressItemcolumn[form_id] = " . pnVarPrepForStore($form_id) 
+    $where = "WHERE $FormExpressItemcolumn[form_id] = " . pnVarPrepForStore($form_id)
           ." AND $FormExpressItemcolumn[item_type] = 'radio' "
           ;
-    $result = $dbconn->Execute($sql);
-
-    // Check for an error with the database code, and if so set an appropriate
-    // error message and return
-    if ($dbconn->ErrorNo() != 0) {
-        pnSessionSetVar('errormsg', _GETFAILED.$sql);
-        return false;
-    }
-
+    $name = DBUtil::SelectFieldArray('FormExpressItem', 'item_name', $where, '', 1);
     $input_list = array();
 
-    for (; !$result->EOF; $result->MoveNext()) {
-        list( $input_name
-            )  = $result->fields;
+    foreach ($name as $input_name) {
         $input_list[] = array( 'id' => $input_name
                              , 'selected' => 0
                              , 'name' => $input_name

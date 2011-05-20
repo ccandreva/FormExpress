@@ -343,6 +343,13 @@ class formexpress_admin_item_modifyHandler extends pnFormHandler
       $form_id = $formData['form_id'];
       SessionUtil::delVar('formexpress_item_modify');
 
+      $item_name_pick = $formData['item_name_pick'];
+      unset($formData['item_name_pick']);
+      if ($item_name_pick != 'newradiogroup') {
+          $form['item_name'] = $item_name_pick;
+      }
+      
+      
       if ($formData['func'] == 'new' ) {
         $func = 'item_create';
       } else {

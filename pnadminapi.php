@@ -30,8 +30,6 @@
  */
 
 
-
-
 /**
  * create a new FormExpress item
  * @param $args['formObj'] Object array of form data
@@ -163,33 +161,41 @@ function FormExpress_adminapi_update($args)
  */
 function FormExpress_adminapi_item_create($args)
 {
-
+    // extract($args);
     $itemObj = $args[itemObj];
-
+    $form_id = $itemObj['form_id'];
+    $form_item_id = $itemObj['form_item_id'];
+    $required_sequence = $itemObj['required_sequence'];
+    $item_name = $itemObj['item_name'];
+    
     // See if we have permission to add an item
     // avoid potential security holes or just too much wasted processing
     if (!SecurityUtil::checkPermission ('FormExpress::Item', "$item_name::", ACCESS_ADD)) {
         return LogUtil::registerPermissionError();
     }
 
+    $table = pnDBGetTables();
+    $FormExpressItemtable = $table['FormExpressItem'];
+    $FormExpressItemcolumn = &$table['FormExpressItem_column'];
+    
     //Get the weight
-    $itemObj[sequence] = FormExpress_adminapi_new_weight
-                        ( array ('table' => 'FormExpressItem'
-                                ,'weight_column' => $FormExpressItemcolumn['sequence']
-                                , 'additional_where_clause' => $FormExpressItemcolumn['form_id'].' = '. pnVarPrepForStore($form_id)
+    $new_sequence = FormExpress_adminapi_new_weight
+                        ( array ('table' => $FormExpressItemtable,
+                                'weight_column' => $FormExpressItemcolumn['sequence'],
+                                'additional_where_clause' => $FormExpressItemcolumn['form_id'].' = '. pnVarPrepForStore($form_id)
                                 )
                         );
-    $result = DBUtil::insertObject($itemObj, 'FormExpressItem', false, 'form_item_id');
-
+    $itemObj['sequence'] = $new_sequence;
+    
+    unset($itemObj['form_item_id']);
+    $result = DBUtil::insertObject($itemObj, 'FormExpressItem', 'form_item_id');
     if (!$result) {
         pnSessionSetVar('errormsg', _CREATEFAILED );
         return false;
     }
 
-    // Get the ID of the item that we inserted.  It is possible, although
-    // very unlikely, that this is different from $nextId as obtained
-    // above, but it is better to be safe than sorry in this situation
-    $form_item_id = $dbconn->PO_Insert_ID($FormExpressItemtable, $FormExpressItemcolumn['form_item_id']);
+    // Get the ID of the item that we inserted.
+    $form_item_id = $itemObj['form_item_id'];
 
     //This is where we move the item to it's required position
     //Loop through the weight shifter 'til we're in the right place
@@ -208,10 +214,8 @@ function FormExpress_adminapi_item_create($args)
             );
         }
     }
+
     // Let any hooks know that we have created a new item.  As this is a
-    // create hook we're passing 'tid' as the extra info, which is the
-    // argument that all of the other functions use to reference this
-    // item
     pnModCallHooks('item', 'create', $form_item_id, 'form_item_id');
 
     // Return the id of the newly created item to the calling process
@@ -275,10 +279,6 @@ function FormExpress_adminapi_item_update($args)
  */
 function FormExpress_adminapi_item_delete($args)
 {
-    // Get arguments from argument array - all arguments to this function
-    // should be obtained from the $args array, getting them from other
-    // places such as the environment is not allowed, as that makes
-    // assumptions that will not hold in future versions of PostNuke
     extract($args);
 
     // Argument check - make sure that all required arguments are present,
@@ -350,27 +350,25 @@ function FormExpress_adminapi_get_radio_input_list( $args )
 
 function FormExpress_adminapi_new_weight($args) {
     extract($args);
-    if ( (!isset($table))
-       //||(!isset($pk_column))
-       ||(!isset($weight_column))
-       ) {
-        pnSessionSetVar('errormsg', _MODARGSERROR);
+    if ( (!isset($table))) {
+        pnSessionSetVar('errormsg', 'Missing table in new_weght');
+        return false;
+    }
+    if ( (!isset($weight_column))  ) {
+        pnSessionSetVar('errormsg', 'Missing weight_column in new_weight');
         return false;
     }
 
-    list($dbconn) = pnDBGetConn();
-    //Don't need to get pntables - using $column
-    $sql = 'SELECT max('.$weight_column.')+10 '
+    $sql = 'SELECT max('.$weight_column.') as wm'
           .'  FROM '.$table
           .' WHERE '.$additional_where_clause
           ;
-    $result = $dbconn->Execute($sql);
-    list($weight) = $result->fields;
-    if (empty($weight)) { //first new row
-        return 10;
-    } else {
-        return $weight;
-    }
+
+    $result = DBUtil::executeSQL($sql);
+    list($row) = DBUtil::marshallObjects($result, array('wm'));
+    $weight = $row['wm'] + 10;
+    return $weight;
+
 }
 /**
  * FormExpress (items) specific wrapper 
@@ -654,7 +652,5 @@ function FormExpress_adminapi_getlinks()
         array ('url' => pnModURL('FormExpress', 'admin', 'view_docs'), 'text' => __('Documentation', $dom) ),
     );
 }
-
-        
 
 ?>

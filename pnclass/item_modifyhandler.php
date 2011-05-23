@@ -284,6 +284,7 @@ class formexpress_admin_item_modifyHandler extends pnFormHandler
             $type = $form_item['item_type'];
             $form_id = $form_item['form_id'];
             $rs = $form_item['required_sequence'];
+
             SessionUtil::setVar('formexpress_item_modify', array ('func' => $func,
               'form_id' => $form_id, 'item_type' => $type,
               'form_item_id' => $form_item['form_item_id'],
@@ -343,20 +344,21 @@ class formexpress_admin_item_modifyHandler extends pnFormHandler
       $form_id = $formData['form_id'];
       SessionUtil::delVar('formexpress_item_modify');
 
-      $item_name_pick = $formData['item_name_pick'];
-      unset($formData['item_name_pick']);
-      if ($item_name_pick != 'newradiogroup') {
-          $form['item_name'] = $item_name_pick;
+      if (isset($formData['item_name_pick'])) {
+          $item_name_pick = $formData['item_name_pick'];
+          unset($formData['item_name_pick']);
+          if ($item_name_pick != 'newradiogroup') {
+              $formData['item_name'] = $item_name_pick;
+          }
       }
-      
       
       if ($formData['func'] == 'new' ) {
         $func = 'item_create';
       } else {
         $func = 'item_update';
       }
-        $stat = pnModAPIFunc('FormExpress', 'admin', $func,
-                array('itemObj' => $formData) );
+      $stat = pnModAPIFunc('FormExpress', 'admin', $func, array('itemObj' => $formData) );
+      
       if ($stat == false) {
         $render->assign('errormsg', __('An error occurred saving the form: ') . $form_id . ' ' . pnSessionGetVar('errormsg') ); 
 	return false;

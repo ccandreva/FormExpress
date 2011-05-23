@@ -455,7 +455,7 @@ function FormExpress_admin_item_new($args)
     $form_id = FormUtil::getPassedValue('form_id');
     $item_type = FormUtil::getPassedValue('item_type');
     $required_sequence = FormUtil::getPassedValue('required_sequence');
-    
+
     // Admin functions of this type can be called by other modules.
     extract($args);
 

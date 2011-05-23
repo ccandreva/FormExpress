@@ -200,8 +200,6 @@ function FormExpress_adminapi_item_create($args)
     //This is where we move the item to it's required position
     //Loop through the weight shifter 'til we're in the right place
     
-//$required_sequence = 100;
-
     if ( $required_sequence ) {
         //Safety net in case required seq is too low
         $shift_weight_range = FormExpress_adminapi_get_item_weight_range( $form_id );

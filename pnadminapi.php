@@ -357,14 +357,14 @@ function FormExpress_adminapi_new_weight($args) {
         return false;
     }
 
-    $sql = 'SELECT max('.$weight_column.') as wm'
+    $sql = 'SELECT max('.$weight_column.') as wmax'
           .'  FROM '.$table
           .' WHERE '.$additional_where_clause
           ;
 
     $result = DBUtil::executeSQL($sql);
-    list($row) = DBUtil::marshallObjects($result, array('wm'));
-    $weight = $row['wm'] + 10;
+    list($row) = DBUtil::marshallObjects($result, array('wmax'));
+    $weight = $row['wmax'] + 10;
     return $weight;
 
 }
@@ -408,6 +408,8 @@ function FormExpress_adminapi_shift_item_weight( $args ) {
                )
            );
 }
+
+
 /**
  * This is a generic utility function for getting the min or max weight
  * Create wrapper functions for each table you want to use this.
@@ -423,18 +425,17 @@ function FormExpress_get_weight_range( $table
         return false;
     }
 
-    list($dbconn) = pnDBGetConn();
-    //Don't need to get pntables - using $column
-    $sql = 'SELECT min('.$weight_column.')'
-          .'     , max('.$weight_column.')'
+    $sql = 'SELECT min('.$weight_column.') as wmin'
+          .'     , max('.$weight_column.') as wmax'
           .'  FROM '.$table
           .' WHERE '.$additional_where_clause
           ;
-    $result = $dbconn->Execute($sql);
-    list($min, $max) = $result->fields;
-    return array( 'min' => $min
-                , 'max' => $max
-                );
+
+    $result = DBUtil::executeSQL($sql);
+    list($row) = DBUtil::marshallObjects($result, array('min', 'max'));
+
+    // $row now has an array keyed by 'min' and 'max';
+    return $row;
 }
 
 /**

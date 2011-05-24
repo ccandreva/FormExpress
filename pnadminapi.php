@@ -530,7 +530,7 @@ function FormExpress_adminapi_item_get($args)
         return false;
     }
 
-    $result = DBUtil::selectObjectByID('FormExpressItem', 'form_item_id');
+    $result = DBUtil::selectObjectByID('FormExpressItem', $form_item_id, 'form_item_id');
 
     // Check for no rows found, and if so return
     if (!$result) {

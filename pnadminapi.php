@@ -461,8 +461,6 @@ function FormExpress_shift_weight( $table
     if (!isset($action)) { $action == 'heavier'; }
     if (!isset($additional_where_clause)) { $additional_where_clause == '1=1'; }
 
-    list($dbconn) = pnDBGetConn();
-    //Don't need to get pntables - using $pk_column etc..
 
     //If action = lighter then swap with prev row
     //Get the current row

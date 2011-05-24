@@ -472,8 +472,12 @@ function FormExpress_shift_weight( $table
           .' WHERE '.$pk_column.' = '.$pk_value
           .'   AND '.$additional_where_clause 
           ;
-    $result = $dbconn->Execute($sql);
-    list($curr_pk, $curr_weight) = $result->fields;
+    $result = DBUtil::executeSQL($sql);
+    list($row) = DBUtil::marshallObjects($result, array($pk_column, $weight_column));
+    $curr_pk = $row[$pk_column];
+    $curr_weight = $row[$weight_column];
+
+    //
     //Get the next or prev row
     //We need the ORDER BY to ensure we fetch the next consecutive row, not just any row > curr_weight!
     $sql = 'SELECT '.$pk_column
@@ -484,20 +488,25 @@ function FormExpress_shift_weight( $table
           .' ORDER BY '.$weight_column
           .' '.(($action == 'lighter') ? DESC : ASC)
           ;
-    $result2 = $dbconn->SelectLimit($sql, 1);
-    list($swap_pk, $swap_weight) = $result2->fields;
+
+    $result = DBUtil::executeSQL($sql);
+    list($row) = DBUtil::marshallObjects($result, array($pk_column, $weight_column));
+    $swap_pk = $row[$pk_column];
+    $swap_weight = $row[$weight_column];
+
     //Should always find the curr weight. but may not find the swap item
     if (!empty($swap_pk)) {
         $sql = 'UPDATE '.$table
               .'   SET '.$weight_column.' = '.$swap_weight
               .' WHERE '.$pk_column.' = '.$curr_pk
               ;
-        $result = $dbconn->Execute($sql);
+        $result = DBUtil::executeSQL($sql);
+
         $sql = 'UPDATE '.$table
               .'   SET '.$weight_column.' = '.$curr_weight
               .' WHERE '.$pk_column.' = '.$swap_pk
               ;
-        $result = $dbconn->Execute($sql);
+        $result = DBUtil::executeSQL($sql);
         return $swap_weight;
     }
     return $curr_weight;

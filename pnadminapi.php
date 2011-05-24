@@ -544,6 +544,74 @@ function FormExpress_adminapi_item_get($args)
     return $result;
 }
 
+/**
+ * Load a form from a text file in 'serialize' format
+ * @param import_file_name  The file name to import
+ */
+function FormExpress_adminapi_serialize2form($args) {
+    
+    $import_file_name = $args['import_file_name'];
+    //Read the file
+    //How strange - I have to assign the $import_file to another var to get this to work!
+    $filename = $import_file_name;
+    //Added 'b' to read binary safe on Windows - Thank to Jason Earl for the hint
+    $fd = @fopen ($filename, 'rb');
+    $contents = fread ($fd, filesize ($filename));
+    @fclose ($fd);
+    //Unlink of temp file appears to work automagically (at end of script execution?)
+    //but just in case...
+    @unlink($fd);
+
+    $form = array();
+    $form = unserialize($contents);
+
+    return ( $form);
+}
+
+/**
+ * Create a form from form data.
+ * @param form  The form data
+ */
+function FormExpress_adminapi_loadform($args) {
+
+    $form = $args['form'];
+    if (!is_array($form)) {
+        pnSessionSetVar('statusmsg', __('Error: Form data is not an array.'));
+        return false;
+    }
+
+    unset($form['form_id']);
+    $form['form_id'] = pnModAPIFunc('FormExpress', 'admin', 'create', array('formObj' => $form) );
+
+    if ($form['form_id'] == false) {
+        pnSessionSetVar('statusmsg', __('The form was NOT created.'));
+        return false;
+    } else {
+        // Success
+        pnSessionSetVar('statusmsg', _FORMEXPRESSCREATED);
+    }
+
+    if ( is_array($form['items']) ) {
+        foreach ( $form['items'] as $item ) {
+            unset($item['form_item_id']);
+            $item['form_id'] = $form['form_id'];
+
+            $item['form_item_id'] = pnModAPIFunc('FormExpress'
+                                                , 'admin'
+                                                , 'item_create'
+                                                , array('itemObj' => $item )
+                                                );
+            if ($form_item_id != false) {
+                // Success
+                pnSessionSetVar('statusmsg', _FORMEXPRESSCREATED);
+            }
+        }
+    }
+
+}
+
+
+
 
 /**
  * get available admin panel links
@@ -560,6 +628,7 @@ function FormExpress_adminapi_getlinks()
         array ('url' => pnModURL('FormExpress', 'admin', 'view'), 'text' => __('View Form', $dom) ),
         array ('url' => pnModURL('FormExpress', 'admin', 'import_export'), 'text' => __('Import/Export', $dom) ),
         array ('url' => pnModURL('FormExpress', 'admin', 'modifyconfig'), 'text' => __('Edit Form Configuration', $dom) ),
+        array ('url' => pnModURL('FormExpress', 'admin', 'createexample'), 'text' => __('Create Example Forms', $dom) ),
         array ('url' => pnModURL('FormExpress', 'admin', 'view_docs'), 'text' => __('Documentation', $dom) ),
     );
 }

@@ -291,61 +291,6 @@ function FormExpress_admin_export($args) {
 }
 
 
-/** *********************************************************************************
- * Split into seperate function so it can be called on install
- */
-function FormExpress_serialize2form($import_file_name) {
-    //Read the file
-    //How strange - I have to assign the $import_file to another var to get this to work!
-    $filename = $import_file_name;
-    //Added 'b' to read binary safe on Windows - Thank to Jason Earl for the hint
-    $fd = @fopen ($filename, 'rb');
-    $contents = fread ($fd, filesize ($filename));
-    @fclose ($fd);
-    //Unlink of temp file appears to work automagically (at end of script execution?)
-    //but just in case...
-    @unlink($fd);
-
-    $form = array();
-    $form = unserialize($contents);
-
-    return ( $form);
-}
-
-/** *********************************************************************************
- * Need to put some exception handling in here
- * Actually this is now apparently not used, commenting out until we are sure.
-function FormExpress_loadform($form) {
-
-    unset($form['form_id']);
-    $form['form_id'] = pnModAPIFunc('FormExpress', 'admin', 'create', $form);
-
-    if ($form_id != false) {
-        // Success
-        pnSessionSetVar('statusmsg', _FORMEXPRESSCREATED);
-    }
-
-    if ( is_array($form['items']) ) {
-        foreach ( $form['items'] as $item ) {
-            unset($item['form_item_id']);
-            $item['form_id'] = $form['form_id'];
-
-            $item['form_item_id'] = pnModAPIFunc('FormExpress'
-                                                , 'admin'
-                                                , 'item_create'
-                                                , $item
-                                                );
-            if ($form_item_id != false) {
-                // Success
-                pnSessionSetVar('statusmsg', _FORMEXPRESSCREATED);
-            }
-        }
-    }
-
-}
-*/
-
-
 //======================= FormExpress Items code ==========================================
 /**
  * view items
@@ -853,6 +798,32 @@ function FormExpress_admin_item_delete($args)
                         , array('form_id' => $form_item['form_id'])
                         )
               );
+    
+    // Return
+    return true;
+}
+
+/**
+ * Create example forms
+ * @param None
+ */
+function FormExpress_admin_createexample($args)
+{
+    $ModName = basename( dirname( __FILE__ ) );
+    
+    $files = array ('example.fxm', 'example2.fxm');
+    foreach ($files as $file) {
+        $file = "modules/$ModName/$file";
+        $form = pnModAPIFunc('FormExpress', 'admin', 'serialize2form', array ('import_file_name' => $file));
+        pnModAPIFunc('FormExpress', 'admin', 'loadform', array ('form' => $form) );
+    }
+
+    $dom = ZLanguage::getModuleDomain('FormExpress');
+    pnSessionSetVar('statusmsg', __('The example forms were created', $dom));
+
+    // This function generated no output, and so now it is complete we redirect
+    // the user to an appropriate page for them to carry on their work
+    pnRedirect( pnModURL( 'FormExpress', 'admin', 'view' ) );
     
     // Return
     return true;

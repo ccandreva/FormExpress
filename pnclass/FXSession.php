@@ -8,18 +8,6 @@ class FXSession {
     var $submitted_form;
 
     /** ****************************************************************************
-     * Try to get over one of the PHP version issues...
-     * Remove this kludge when PN requires PHP >= 4.1.0
-     */
-    function fx_key_exists($form_id, $forms) {
-        if ( function_exists('array_key_exists') ) {
-            return array_key_exists($form_id, $forms);
-        } else {
-            return key_exists($form_id, $forms);
-        }
-    }
-
-    /** ****************************************************************************
      * Constructor
      * Gets the FormExpress Session variables (if any)
      */
@@ -28,12 +16,6 @@ class FXSession {
         $this->forms = pnSessionGetVar('FormExpressData');
         if ( empty($this->forms) ) {
             pnSessionSetVar('FormExpressData', $this->forms);
-        }
-
-        if ( function_exists('array_key_exists') ) {
-            $this->key_exists_func = 'array_key_exists';
-        } else {
-            $this->key_exists_func = 'key_exists';
         }
 
     }
@@ -64,7 +46,7 @@ class FXSession {
             $form_id = pnSessionGetVar('FormExpressSubmittedForm'); 
         }
         if ( ( count($this->forms) > 0 )  
-           &&( $this->fx_key_exists($form_id, $this->forms) )
+           &&( array_key_exists($form_id, $this->forms) )
            ) {
             return $this->forms[$form_id];
         } else {
@@ -84,7 +66,7 @@ class FXSession {
      */
     function delForm($form_id) {
         if ( ( is_array($this->forms) ) 
-           &&( $this->fx_key_exists($form_id, $this->forms) ) 
+           &&( array_key_exists($form_id, $this->forms) ) 
            ) {
             unset($this->forms[$form_id]);
             pnSessionSetVar('FormExpressData', $this->forms);

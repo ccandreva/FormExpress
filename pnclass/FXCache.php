@@ -17,28 +17,13 @@ class FXCache {
      *                         )
      *       )
      */
-    var $dbconn;
-    var $pntable;
-    var $FormExpressCache;
-    var $FormExpressCache_column;
     var $useCache;
 
     /** **************************************************************************
      * Constructor
-     * Gets all the db and table info
+     * @param useCache: Enable/Disable caching
      */
     function FXCache($useCache=true) {
-        //FormExpress Module should already be loaded...
-        if (!pnModDBInfoLoad('FormExpress')) {
-            pnSessionSetVar('errormsg', _FAILEDTOLOADMODULE);
-            return false;
-        }
-        list($this->dbconn) = pnDBGetConn();
-        $this->pntable = pnDBGetTables();
-        $this->FormExpressCache = $this->pntable['FormExpressCache'];
-        $pntable = $this->pntable;
-        $this->FormExpressCache_column = &$pntable['FormExpressCache_column'];
-
         $this->useCache = $useCache;
 
     }
@@ -55,20 +40,8 @@ class FXCache {
             return false;
         }
 
-        // Load API.  Note that this is loading the user API, that is because the
-        // user API contains the function to obtain item information which is the
-        // first thing that we need to do.  If the API fails to load an appropriate
-        // error message is posted and the function returns
-        if (!pnModAPILoad('FormExpress', 'user')) {
-            $output->Text(_LOADFAILED);
-            return $output->GetOutput();
-        }
-
-        $form = pnModAPIFunc('FormExpress'
-                            , 'user'
-                            , 'get'
-                            , array( 'form_id' => $form_id
-                                   )
+        $form = pnModAPIFunc('FormExpress', 'user', 'get'
+                            , array( 'form_id' => $form_id)
                             );
 
         if ($form == false) {
@@ -76,32 +49,18 @@ class FXCache {
             return false;
         }
 
-        $form['items'] = pnModAPIFunc('FormExpress'
-                                     , 'user'
-                                     , 'items_getall'
+        $form['items'] = pnModAPIFunc('FormExpress', 'user', 'items_getall'
                                      , array( 'form_id' => $form_id
                                             , 'status' => 'active'
                                             )
                                      );
 
-        //We don't care if no items (at this stage maybe valid)
-        //if ($form['items'] == false) {
-        //    pnSessionSetVar('errormsg', _FORMEXPRESSNOITEMSFOUND);
-        //    //return false;
-        //}
-
 
         if ( ($this->useCache) && ($form['active'])) {
             //// Insert into the cache for future use
-            $sql = 'INSERT INTO '.$this->FormExpressCache
-                  .'     ( '.$this->FormExpressCache_column['form_id']
-                  .'     , '.$this->FormExpressCache_column['form_data']
-                  .'     ) VALUES '
-                  ."     ( '" . pnVarPrepForStore($form_id) . "'"
-                  ."     , '" . pnVarPrepForStore(serialize($form)) . "'"
-                  .'     )';
-            $this->dbconn->Execute($sql);
-            if ($this->dbconn->ErrorNo() != 0) {
+            $cacheObj = array ( 'id' => $form_id, 'data' => serialize($form));
+            $result = DBUtil::insertObject($cacheObj, 'FormExpressCache', true);
+            if (!$result) {
                 pnSessionSetVar('errormsg', _SETFAILED.$sql);
                 return false;
             }
@@ -120,22 +79,11 @@ class FXCache {
             return false;
         }
         if ( $this->useCache ) {
-            $sql = 'SELECT '.$this->FormExpressCache_column['form_data']
-                  .'  FROM '.$this->FormExpressCache
-                  .' WHERE '.$this->FormExpressCache_column['form_id'].' = ' 
-                           . pnVarPrepForStore($form_id);
-            $result = $this->dbconn->Execute($sql);
+            $cacheObj = DBUtil::selectObjectByID('FormExpressCache', $form_id);
 
-            // Check for an error with the database code, and if so set an appropriate
-            // error message and return
-            if ($this->dbconn->ErrorNo() != 0) {
-                pnSessionSetVar('errormsg', _GETFAILED.$sql);
-                return false;
-            }
-            //Check to see if we got any rows
-            if (!$result->EOF) {
-                list($form_data_raw) = $result->fields;
-                return unserialize($form_data_raw);
+            //Check to see if we got an object
+            if ($cacheObj) {
+                return unserialize($cacheObj['data']);
             } else { //populate the cache
                 return $this->setForm($form_id);
             }
@@ -155,17 +103,7 @@ class FXCache {
             pnSessionSetVar('errormsg', _MODARGSERROR);
             return false;
         }
-        $sql = 'DELETE FROM '.$this->FormExpressCache
-              .' WHERE '.$this->FormExpressCache_column['form_id'].' = ' 
-                       . pnVarPrepForStore($form_id);
-        $result = $this->dbconn->Execute($sql);
-
-        // Check for an error with the database code, and if so set an appropriate
-        // error message and return
-        if ($this->dbconn->ErrorNo() != 0) {
-            pnSessionSetVar('errormsg', _GETFAILED.$sql);
-            return false;
-        }
+        DBUtil::deleteObjectByID('FormExpressCache', $form_id);
     }
 
 }

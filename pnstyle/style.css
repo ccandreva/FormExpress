@@ -51,7 +51,7 @@ form.FormExpress ul.FEl1> li  form.FormExpress ul.FEl1 ul.FEl2 li
 form.FormExpress > ul.FEl1 > li,
 form.FormExpress > fieldset > ul.FEl1 > li
 {
-/*	clear: left; */
+	clear: left;
 }
 
 

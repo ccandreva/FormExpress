@@ -14,7 +14,9 @@ function smarty_function_feshowinput($params, &$smarty)
   $field_attributes = $item['item_attributes'];
   
   // Find a value for this field, could be in one of three places.
-  foreach (array('user_data', 'default_value', 'item_value') as $v) {
+  $chkfields = array('default_value', 'item_value');
+  if ($type != 'radio') $chkfields[] = 'user_data';
+  foreach ($chkfields as $v) {
     if ( isset($item[$v]) && $item[$v] != '') {
       $value = $item[$v];
       break;
@@ -30,8 +32,8 @@ function smarty_function_feshowinput($params, &$smarty)
     /* Select lists need to be built from the parts */
     case 'selectlist' :
       $input = '<select name="' . $name . '" id="' . $name .'" '
-        . feshowinput_formatopt('size', $item['rows'], '1')
-//        . feshowinput_formatopt('multiple', $item['multiple'])
+        . feshowinput_FormatOpt('size', $item['rows'], '1')
+//        . feshowinput_FormatOpt('multiple', $item['multiple'])
         . $field_attributes
         . ">\n";
       
@@ -53,10 +55,17 @@ function smarty_function_feshowinput($params, &$smarty)
     case 'password' :
       unset($value);
 
+    /* Check and radio buttons may need "CHECKED" attribute */
+    case 'checkbox' :
+    case 'radio' :
+      if ($item['user_data'] == $item['item_value']) {
+          $checked = 'checked="checked" ';
+      }
+      
     /* Passwords and text fields have size and length */
     case 'text' :
-      $attributes .= feshowinput_formatopt('size', $item['cols'], 16);
-      $attributes .= feshowinput_formatopt('maxlength', $item['max_length'], 64);
+      $attributes .= feshowinput_FormatOpt('size', $item['cols'], 16);
+      $attributes .= feshowinput_FormatOpt('maxlength', $item['max_length'], 64);
 
     /* Now for everything that isn't a selectlist */
     default:
@@ -66,8 +75,8 @@ function smarty_function_feshowinput($params, &$smarty)
         $input = '<textarea ';
         $end = $value . '</textarea>';
         unset($value);
-        $attributes .= feshowinput_formatopt('rows', $item['rows'], 6);
-        $attributes .= feshowinput_formatopt('cols', $item['cols'], 40);
+        $attributes .= feshowinput_FormatOpt('rows', $item['rows'], 6);
+        $attributes .= feshowinput_FormatOpt('cols', $item['cols'], 40);
       }
       /* Otherwise, we use an input of the correct type */
       else {
@@ -78,7 +87,7 @@ function smarty_function_feshowinput($params, &$smarty)
       if (isset($value)) {
         $value = 'value="' . $value . '" ';
       }
-
+      
       /* Read and increment tabindex */
       $tabindex = $smarty->get_template_vars('tabindex') + 1;
       $smarty->assign('tabindex', $tabindex);
@@ -87,7 +96,7 @@ function smarty_function_feshowinput($params, &$smarty)
       $input .= 'name="' . $name . '" '
         . 'id="' . $name . '" '
         . 'tabindex="' . $tabindex . '" '
-        . $value . $attributes . $field_attributes
+        . $value . $checked . $attributes . $field_attributes
         . '/>' . $end . "\n";
   }
 
@@ -115,7 +124,7 @@ function smarty_function_feshowinput($params, &$smarty)
  }
  
 
-function feshowinput_formatopt($tag, $value, $default)
+function feshowinput_FormatOpt($tag, $value, $default)
 {
     if ( ($value == '') && ($default != '') ) $value = $defualt;
     if ($value != '') return $tag . '="' . $value . '" ';

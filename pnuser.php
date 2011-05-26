@@ -133,7 +133,8 @@ function FormExpress_user_display_form($args)
     $form = $fxCache->getForm($form_id);
 
     $fxSession = new FXSession();
-    $form['user_data'] = $fxSession->getForm($form_id);
+    // $form['user_data'] = $fxSession->getForm($form_id);
+    $user_data = $fxSession->getForm($form_id);
 
     /**
      *  We need to know the relative position of the 'next' item, which 
@@ -146,8 +147,10 @@ function FormExpress_user_display_form($args)
     $form['items'][0]['isfirst'] = true;
     $form['items'][$max]['islast'] = true;
     for ($i=0; $i<$max; $i++) {
-      $form['items'][$i]['next_position'] = $form['items'][$i+1]['relative_position'];
-      $form['items'][$i]['Num'] = $i;
+      $item = &$form['items'][$i];
+      $item['user_data'] = $user_data[$item['item_name']];
+      $item['next_position'] = $form['items'][$i+1]['relative_position'];
+      $item['Num'] = $i;
     }
     $render->assign('form', $form);
 

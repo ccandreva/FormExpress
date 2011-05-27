@@ -9,9 +9,11 @@
  *
  */
 
+$dom = ZLanguage::getModuleDomain('FormExpress');
+
 $modversion['name'] = 'FormExpress';
 $modversion['displayname'] = 'FormExpress';
-$modversion['description'] = 'Admin configurable Input Forms';
+$modversion['description'] = __('Build forms for your site using a web interface',$dom);
 $modversion['version'] = '0.4.1';
 $modversion['credits'] = 'docs/credits.txt';
 $modversion['help'] = 'docs/help.txt';

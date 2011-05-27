@@ -76,7 +76,7 @@ function FormExpress_formblock_display($blockinfo)
     $blockinfo['content'] = pnModFunc( 'FormExpress', 'user', 'display_form',
                array( 'form_id' => $form_id, 'admin_mode' => false)
             );
-    //$blockinfo['content'] = "<p> formid is $form_id</p>";
+
     return themesideblock($blockinfo);
 }
 
@@ -91,14 +91,20 @@ function FormExpress_formblock_modify($blockinfo)
 
     // Defaults
     if (empty($vars['form_id'])) {
-        $vars['form_id'] = pnModGetVar('FormExpress', 'default_form_id');
+        $form_id = pnModGetVar('FormExpress', 'default_form_id');
+    } else {
+        $form_id = $vars['form_id'];
     }
 
     // Get the form list
     $forms = pnModAPIFunc( 'FormExpress', 'user', 'getall');
 
     $render = pnRender::getInstance('FormExpress');
-    $forms[$vars['form_id']][selected] = 1;
+
+    // Pre-select current form
+    if (isset($forms[$form_id])) {
+        $forms[$form_id][selected] = 1;
+    }
     $render->assign('forms', $forms);
     
     return $render->fetch('formexpress_block_formblock_modify.html');;

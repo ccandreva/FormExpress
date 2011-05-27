@@ -123,6 +123,7 @@ function FormExpress_user_display_form($args)
     }
 
     $form_id = FormUtil::getPassedValue('form_id');
+    if (!$form_id) $form_id = $args['form_id'];
 
     $render = pnRender::getInstance('FormExpress');
     if (isset($args['showheaders'])) {

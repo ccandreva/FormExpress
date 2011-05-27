@@ -1,0 +1,11 @@
+
+<p>
+    <label for="form_id"><!--[gt text="Form Name"]--></label>
+    <select name="form_id" id="form_id">
+        <!--[foreach from=$forms item=form]-->
+            <option label="<!--[$form.form_name]-->" value="<!--[$form.form_id]-->" <!--[if $form.selected]-->selected="yes"<!--[/if]-->>
+                    <!--[$form.form_name]-->
+            </option>
+        <!--[/foreach]-->
+    </select>
+</p>

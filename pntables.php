@@ -115,8 +115,8 @@ function FormExpress_pntables()
         'form_data'   => 'fx_form_data'
         );
     $table['FormExpressCache_column_def'] = array(
-        'form_id'   => 'I NOTNULL PRIMARY AUTOINCREMENT',
-        'form_data'   => 'B DEFAULT NULL'
+        'id'   => 'I NOTNULL PRIMARY AUTOINCREMENT',
+        'data'   => 'B DEFAULT NULL'
         );
 
 

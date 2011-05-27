@@ -1,6 +1,9 @@
 <?php
 /* 
- * Function to show form input fields 
+ * Function to show form input fields and labels
+ * 
+ * This is a plugin due to the complexity of determinging 
+ * field options and the ordering of the label/field.
  */
 
 function smarty_function_feshowinput($params, &$smarty)
@@ -55,7 +58,7 @@ function smarty_function_feshowinput($params, &$smarty)
     case 'password' :
       unset($value);
 
-    /* Check and radio buttons may need "CHECKED" attribute */
+    /* Check boxes and radio buttons may need "CHECKED" attribute */
     case 'checkbox' :
     case 'radio' :
       if ($item['user_data'] == $item['item_value']) {
@@ -104,7 +107,8 @@ function smarty_function_feshowinput($params, &$smarty)
   /* Set up the prompt, if one exists */
   if (!empty($item['prompt'])) {
     $promptpos = $item['prompt_position'];
-    $label = '<label for="' . $name . '" class="' . $promptpos . '">' . $item['prompt'] . "</label>\n";
+    if ($item['required']) $required = '*';
+    $label = '<label for="' . $name . '" class="' . $promptpos . '">' . $item['prompt'] . $required .  "</label>\n";
 
     /* The order of prompt and field changes depending on some positions */
     switch($promptpos) {

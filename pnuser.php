@@ -169,8 +169,8 @@ function FormExpress_user_submit_form() {
 
     // Confirm authorisation code.
     if (!pnSecConfirmAuthKey()) {
-	$pnRender = new pnRender('FormExpress');
-	return $pnRender->fetch('formexpress_user_submit_form_badkey.html');
+	$render = new pnRender('FormExpress');
+	return $render->fetch('formexpress_user_submit_form_badkey.html');
     }
 
     $form_id = FormUtil::getPassedValue('form_id');
@@ -188,7 +188,8 @@ function FormExpress_user_submit_form() {
     $user_data = array();
     //Load the array
     foreach($form['items'] AS $item) {
-        if ( !ereg('boilerplate|groupstart|groupend|reset', $item['item_type'])) {
+        if ( fe_itemHasValue($item['item_type'])) {
+
             //Get the input name
             $input_name = $item['item_name'].$form['input_name_suffix'];
             //!TODO Need to do something for SelectMultple when 
@@ -453,7 +454,6 @@ function FormExpress_user_showPage($args) {
 function FormExpress_user_sendmail($args) {
 
     $dom = ZLanguage::getModuleDomain('FormExpress');
-    // extract($args);
     
     if (isset($args['email_address']) || empty($args['email_address']) ) {
         $email_address = $args['email_address'];
@@ -470,27 +470,18 @@ function FormExpress_user_sendmail($args) {
     $fxCache = new FXCache();
     $form = $fxCache->getForm($form_id);
 
-    //Do any custom validation
-    //if (!1==2) {
-    //    pnSessionSetVar('errormsg', _FORMEXPRESSCUSTOMVALIDATIONERROR);
-    //    return false; //_FORMEXPRESSCUSTOMVALIDATIONERROR;
-    //}
-
-
-    $message_id = time();
-
-    $adminmail = pnConfigGetVar('adminmail');
-    // $message = _FORMEXPRESSEMAILHEADER."\n\n";
-    $message .= _FORMEXPRESSEMAILID."$message_id\n\n";
-    $message = __('Mail ID = ', $dom) . $message_id . "\n\n";
     $dup_list = array();
-    $replymail;
+    $mailData = array();
+    // Load field names and values into an array
+    // To pass to the Smarty template to format the email.
     foreach($form['items'] AS $item) {
         //TODO! Tidy up ifs
-        if ( !ereg('boilerplate|groupstart|groupend|reset', $item['item_type'])) {
+        if ( fe_ItemHasValue($item['item_type'])) {
+            $item_name = $item['item_name'];
+
             //TODO! Need to add some logic for multiple selects (when supported)
-            if (!in_array($item['item_name'], $dup_list) && $user_data[$item['item_name']] ) {
-                $message = $message.$item['item_name'].' = '.$user_data[$item['item_name']]." \n\n";
+            if (!in_array($item_name, $dup_list) && $user_data[$item_name] ) {
+                $mailData[] = array('name' => $item_name, 'value' => $user_data[$item_name]);
                 $dup_list[] = $item['item_name'];
             }
             if ( $item['item_name']  == 'replyto_email' ) {
@@ -499,15 +490,25 @@ function FormExpress_user_sendmail($args) {
         }
     }
 
-    // $message = $message."\n\n"._FORMEXPRESSEMAILFOOTER;
-    //Cannot use pnMail, because it does not return true or false...
-    if (   mail( $email_address
-               , __('Results from form ', $dom) . $form['form_name']
-               , $message
-               , "From: ".$adminmail."\r\nReply-to: ".($replymail ? $replymail : $adminmail)."\r\n"
-               )
-       ) {
+    $message_id = time();  //current time in seconds as a simple mail ID
+    $adminmail = pnConfigGetVar('adminmail');
 
+    $render = pnRender::getInstance('FormExpress');
+    $render->assign('message_id', $message_id);
+    $render->assign('mailData', $mailData);
+    $message = $render->fetch('formexpress_user_sendmail.txt');
+
+    // Actually send the mail.
+    $result = pnModAPIFunc('Mailer', 'user', 'sendmessage', array(
+                'toaddress' => $email_address,
+                'replytoaddress' => $replay_mail,
+                'sendmail_from' => $adminmail,
+                'subject' => __('Results from form: ', $dom) . $form['form_name'],
+                'body' => $message,
+                'html' => false
+            ) );
+
+    if ( $result ) {
         pnSessionSetVar('FORMEXPRESSSUBMITID',  $message_id);
 
         /* Clear the user session data */
@@ -515,7 +516,8 @@ function FormExpress_user_sendmail($args) {
         return true;
 
     } else {
-        pnSessionSetVar('errormsg', __('Mail transport failure',$dom));
+        pnSessionSetVar('errormsg', 
+            __('Your form could not be mailed. You may want to wait a few minutes and try again, in case this was a temporary problem.',$dom));
         return false;
     }
 }
@@ -531,6 +533,15 @@ function FormExpress_user_display_message($args)
    $render->assign('submitid', pnSessionGetVar('FORMEXPRESSSUBMITID') );
    pnSessionDelVar('FORMEXPRESSSUBMITID');
    return $render->fetch('formexpress_user_display_message.html');;   
+}
+
+/**
+ *  Check if a form item is a type that has a value
+ * @param type $ItemName - the name of the item type
+ * @return type bool
+ */
+function fe_ItemHasValue($ItemName) {
+    return !preg_match('/boilerplate|groupstart|groupend|reset/', $ItemName);
 }
 
 ?>

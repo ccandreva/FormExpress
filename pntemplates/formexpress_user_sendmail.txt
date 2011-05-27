@@ -1,0 +1,6 @@
+<!--[gt text="Mail ID ="]--> <!--[$message_id]-->
+
+<!--[foreach from=$mailData item=item]-->
+<!--[$item.name]--> = <!--[$item.value]-->
+
+<!--[/foreach]-->

@@ -2,7 +2,7 @@
 /**
  * FormExpress : Build forms for Zikula through a web interface
  *
- * @copyright (c) 2002 Stutchbury Limited, 2010 Chris Candreva
+ * @copyright (c) 2002 Stutchbury Limited, 2011 Chris Candreva
  * @Version $Id$
  * @license GNU/GPL - http://www.gnu.org/copyleft/gpl.html
  * @package FormExpress
@@ -111,8 +111,8 @@ function FormExpress_pntables()
 
     $table['FormExpressCache'] = DBUtil::getLimitedTablename('FormExpressCache');
     $table['FormExpressCache_column'] = array(
-        'form_id'   => 'fx_form_id',
-        'form_data'   => 'fx_form_data'
+        'id'   => 'fx_form_id',
+        'data'   => 'fx_form_data'
         );
     $table['FormExpressCache_column_def'] = array(
         'id'   => 'I NOTNULL PRIMARY AUTOINCREMENT',

@@ -97,6 +97,14 @@ function FormExpress_upgrade($oldversion)
             pnModSetVar('FormExpress', 'modulestylesheet', 'style.css');
 
             break;
+
+        case '0.3.5':
+        case '0.4.0':
+            /** The module style sheet wasn't originally set in 0.4.0,
+             *  so set it just in case
+             **/
+            pnModSetVar('FormExpress', 'modulestylesheet', 'style.css');
+            
     }
 
     // Update successful

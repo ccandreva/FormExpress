@@ -12,7 +12,7 @@
 $modversion['name'] = 'FormExpress';
 $modversion['displayname'] = 'FormExpress';
 $modversion['description'] = 'Admin configurable Input Forms';
-$modversion['version'] = '0.4.0';
+$modversion['version'] = '0.4.1';
 $modversion['credits'] = 'docs/credits.txt';
 $modversion['help'] = 'docs/help.txt';
 $modversion['changelog'] = 'docs/changelog.txt';

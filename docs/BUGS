@@ -1,5 +1,0 @@
-pnVarCleanFromInput() does not allow multiple values for one input
-
-pnMail() does not return true or false.
-
-pnHTML->FormStart() does not allow a 'target' to be specified (for export to open a new window)

@@ -12,37 +12,42 @@
 
 <!--[ foreach from=$form.items item=item ]-->
 
-<!--[ if $item.item_type == 'groupstart' ]-->
-  </ul>
-  <fieldset>
-  <legend><!--[$item.item_value]--></legend>
-  <ul class="FEl1">
-  <!--[if $ShowEditLinks]--><small><!--[gt text="GroupStart"]--></small><!--[feEditLink item=$item]--><!--[/if]-->
-<!--[ elseif $item.item_type == 'groupend' ]-->
-  </ul>
-  </fieldset>
-  <ul class="FEl1">
-  <!--[if $ShowEditLinks]--><small><!--[gt text="GroupEnd"]--></small><!--[feEditLink item=$item]--><!--[/if]-->
+    <!--[ if $item.item_type == 'groupstart' ]-->
+      </ul>
+      <fieldset>
+      <legend><!--[$item.item_value]--></legend>
+      <ul class="FEl1">
+      <!--[if $ShowEditLinks]--><small><!--[gt text="GroupStart"]--></small><!--[feEditLink item=$item]--><!--[/if]-->
+    <!--[ elseif $item.item_type == 'groupend' ]-->
+      </ul>
+      </fieldset>
+      <ul class="FEl1">
+      <!--[if $ShowEditLinks]--><small><!--[gt text="GroupEnd"]--></small><!--[feEditLink item=$item]--><!--[/if]-->
 
-<!--[ elseif $item.item_type ]-->  <!--[* item_type can't be null *]-->
+    <!--[ elseif $item.item_type ]-->  <!--[* item_type can't be null *]-->
 
-  <!--[if ($item.next_position == 'right') && $InRow == false]-->
-    <!--[ assign var=InRow value=true ]-->
-    <li><ul class="FEl2">
-  <!--[/if]-->
+      <!--[if ($item.next_position == 'right') && $InRow == false]-->
+        <!--[ assign var=InRow value=true ]-->
+        <li><ul class="FEl2">
+      <!--[/if]-->
 
-  <li> <!--[* Start this item *]-->
-    <!--[feshowinput item=$item suffix=$form.input_name_suffix]-->
-    <!--[if $ShowEditLinks]--><!--[ if $item.item_type ==
-    'hidden']--><small><!--[gt text="Hidden"]--></small><!--[/if]--><!--[feEditLink item=$item]--><!--[/if]-->
-  </li> <!--[* End this item *]-->
+      <li> <!--[* Start this item *]-->
+        <!--[ The label and input tags are created by the feshowinput plugin. *]-->
+        <!--[feshowinput item=$item suffix=$form.input_name_suffix]-->
+        <!--[if $ShowEditLinks]-->
+            <!--[ if $item.item_type == 'hidden']-->
+                <small><!--[gt text="Hidden"]--></small>
+            <!--[/if]-->
+            <!--[feEditLink item=$item]-->
+        <!--[/if]-->
+      </li> <!--[* End this item *]-->
 
-  <!--[if ($item.next_position != 'right') && $InRow]-->
-    </ul></li>
-    <!--[ assign var=InRow value=false ]-->
-  <!--[/if]-->
- 
-<!--[/if]--> <!--[* item_type *]-->
+      <!--[if ($item.next_position != 'right') && $InRow]-->
+        </ul></li>
+        <!--[ assign var=InRow value=false ]-->
+      <!--[/if]-->
+
+    <!--[/if]--> <!--[* item_type *]-->
 
 <!--[/foreach]-->
 

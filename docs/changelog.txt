@@ -1,20 +1,66 @@
-Current Release 0.3.5
+@copyright (c) 2002 Stutchbury Limited, 2011 Chris Candreva
+@Version $Id:                                               $
+@license GNU/GPL - http://www.gnu.org/copyleft/gpl.html
+@package FormExpress
 
-Prompts are now <label> elements for better accessability - checkboxes and radio buttons will set/unset from prompt, other input's will gain focus.
 
-New item type of Button - Default value should be 'button', 'submit' or 'reset'. Value will be displayed on button and used for value attribute.
 
-User entered value for input named 'replyto_email' will be used as 'Reply-To:' for easier response to enquiries ('From:' will still show site admin).
+
+Current Release 0.4.1
+
+Convert all database access to use DBUtil
+
+Finish actually converting everything to Render
+
+Fix bugs in re-ordering of form items introduced in 0.4.0
+
+Regression: Convert form block and make it actually work.
+
+Regression: Mark required items with an '*'
+
+Regression: Have field values kept when form fails validation.
+
+Regression: Fix drop-down list of radio button names. 
+
+Send mail using Mailer module.
+
+Remove php4 hacks.
+
+Fix style for left label type.
+
+
+Release 0.4.0
+
+This is the initial release targeted for Zikula. All output is now templated
+via pnRender, using CSS styled lists for template layout. However, the
+output should look identical to previous versions.
+
+Work has started on conversion to gettext. However this is not complete, and
+at this time is a mix of old and new style. 
+
+Release 0.3.5
+
+Prompts are now <label> elements for better accessability - checkboxes and
+radio buttons will set/unset from prompt, other input's will gain focus.
+
+New item type of Button - Default value should be 'button', 'submit' or
+'reset'.  Value will be displayed on button and used for value attribute.
+
+User entered value for input named 'replyto_email' will be used as
+'Reply-To:' for easier response to enquiries ('From:' will still show site
+admin).
 
 Sent mail only shows fields which have values.
 
-Fixed block display (did not load FXHtml class, so hard-coded module name in include path).
+Fixed block display (did not load FXHtml class, so hard-coded module name in
+include path).
 
 Fixed radio input tab indexing.
 
 Fixed invalid nested table layouts.
 
-Fixed <fieldset> handling - note cannot create well formed html unless you expilcitly create  a GroupEnd for each GroupStart.
+Fixed <fieldset> handling - note cannot create well formed html unless you
+expilcitly create a GroupEnd for each GroupStart.
 
 Nice sexy icons for admin page (not).
 
@@ -34,8 +80,8 @@ php-4.3.5 - bug found and fixed by Øivind at canvas.anubix.net (Thank you!)
 Fixed uploading (ie. import) of formexpress forms. It didn't work with never
 versions of php (with register_globals turned off? - I forget :)
 
-Changed default form-type to www-url-encoded - to allow for image uploading with
-Formexpress forms.
+Changed default form-type to www-url-encoded - to allow for image uploading
+with Formexpress forms.
 
 Things done by previous maintainer Philip Fletcher: (0.3.3_rc1)
 
@@ -65,8 +111,9 @@ string (evaluates to false in PHP)
 Release (0.3.1)
 
 Fixed bug which stopped calls to non FormExpress modules:
-{AnyModule:anyfunction&anyvars...} or just {AnyModule}
-provided the Module implements the new module APIs (which most of the interesting stuff doesn't yet).
+{AnyModule:anyfunction&anyvars...} or just {AnyModule} provided the Module
+implements the new module APIs (which most of the interesting stuff doesn't
+yet).
 
 Added ability to call any url as an interim measure:
 {FormExpress:showPage&page_url='http://www.stutchbury.net'}
